@@ -1,0 +1,31 @@
+device=mps  model=microsoft/wavlm-large
+11 singers: CtrSVDD_0052(m4singer), CtrSVDD_0053(m4singer), CtrSVDD_0054(m4singer), CtrSVDD_0055(m4singer), CtrSVDD_0056(m4singer), CtrSVDD_0057(m4singer), CtrSVDD_0110(m4singer), CtrSVDD_0111(m4singer), CtrSVDD_0112(m4singer), CtrSVDD_0113(m4singer), CtrSVDD_0058(opencpop)
+test singers: ['CtrSVDD_0112', 'CtrSVDD_0113']
+train: 2000 clips   test: 600 clips
+
+train features: (2000, 25, 1024)  (66s)
+CV accuracy per layer: 0.73 0.82 0.85 0.88 0.89 0.87 0.90 0.91 0.92 0.92 0.91 0.90 0.91 0.88 0.88 0.85 0.84 0.84 0.84 0.83 0.82 0.84 0.82 0.82 0.81
+-> best layer: 8
+
+CV EER on training singers: 0.093   decision threshold: 0.514
+
+        edit     acc     EER  real ok  fake ok
+       clean   0.873   0.065    0.760    0.987
+         A01  fake detected: 1.000
+         A02  fake detected: 1.000
+         A05  fake detected: 1.000
+         A06  fake detected: 0.960
+         A07  fake detected: 0.980
+         A08  fake detected: 0.980
+     pitch:1   0.500   0.388    0.000    1.000
+     pitch:2   0.500   0.402    0.000    1.000
+     pitch:4   0.500   0.428    0.003    0.997
+     pitch:6   0.502   0.412    0.007    0.997
+   tempo:0.8   0.498   0.397    0.000    0.997
+   tempo:1.2   0.498   0.428    0.000    0.997
+    noise:20   0.792   0.207    0.780    0.803
+    noise:10   0.730   0.272    0.803    0.657
+  reverb:0.5   0.500   0.343    0.000    1.000
+  reverb:1.0   0.500   0.478    0.000    1.000
+
+saved results/wavlm-large_results_n1000_s0.csv   total time 320s

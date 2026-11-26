@@ -1,0 +1,31 @@
+device=mps  model=facebook/wav2vec2-base
+11 singers: CtrSVDD_0052(m4singer), CtrSVDD_0053(m4singer), CtrSVDD_0054(m4singer), CtrSVDD_0055(m4singer), CtrSVDD_0056(m4singer), CtrSVDD_0057(m4singer), CtrSVDD_0110(m4singer), CtrSVDD_0111(m4singer), CtrSVDD_0112(m4singer), CtrSVDD_0113(m4singer), CtrSVDD_0058(opencpop)
+test singers: ['CtrSVDD_0112', 'CtrSVDD_0113']
+train: 2000 clips   test: 600 clips
+
+train features: (2000, 13, 768)  (0s)
+CV accuracy per layer: 0.73 0.82 0.81 0.82 0.80 0.75 0.74 0.68 0.70 0.73 0.73 0.68 0.69
+-> best layer: 3
+
+CV EER on training singers: 0.190   decision threshold: 0.694
+
+        edit     acc     EER  real ok  fake ok
+       clean   0.760   0.178    0.580    0.940
+         A01  fake detected: 1.000
+         A02  fake detected: 0.980
+         A05  fake detected: 1.000
+         A06  fake detected: 0.940
+         A07  fake detected: 0.880
+         A08  fake detected: 0.840
+     pitch:1   0.590   0.373    0.250    0.930
+     pitch:2   0.590   0.378    0.257    0.923
+     pitch:4   0.600   0.357    0.340    0.860
+     pitch:6   0.627   0.353    0.440    0.813
+   tempo:0.8   0.582   0.410    0.237    0.927
+   tempo:1.2   0.552   0.365    0.143    0.960
+    noise:20   0.507   0.350    0.013    1.000
+    noise:10   0.495   0.418    0.000    0.990
+  reverb:0.5   0.558   0.390    0.190    0.927
+  reverb:1.0   0.513   0.438    0.063    0.963
+
+saved results/wav2vec2-base_results_n1000_s0.csv   total time 2s

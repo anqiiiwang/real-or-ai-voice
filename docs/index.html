@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Real Voice or AI Voice? Robust Detection of AI-Sung Chinese Songs</title>
+<meta name="description" content="How robust are singing-voice deepfake detectors to pitch shift, tempo change, noise and reverb? A study on Mandarin singing (CtrSVDD).">
+<style>
+  :root {
+    --page: #f9f9f9; --surface: #ffffff; --ink: #191919; --ink-2: #666666;
+    --grid: #e7e7e7; --axis: #c2c2c2; --border: rgba(11,11,11,0.10);
+    --accent: #257de0;
+    --s1: #257de0; --s2: #f47230; --s3: #00b894;
+    --code-bg: #f1f1f1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page: #0b0b0b; --surface: #191919; --ink: #efefef; --ink-2: #9c9c9c;
+      --grid: #303030; --axis: #474747; --border: rgba(255,255,255,0.10);
+      --accent: #338ced;
+      --s1: #338ced; --s2: #e76624; --s3: #00a888;
+      --code-bg: #232323;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--page); color: var(--ink);
+    font: 17px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", sans-serif;
+  }
+  main { max-width: 860px; margin: 0 auto; padding: 0 22px 80px; }
+  header.hero { max-width: 860px; margin: 0 auto; padding: 72px 22px 28px; }
+  .eyebrow { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); margin: 0 0 14px; }
+  h1 { font-family: Georgia, "Times New Roman", "Songti SC", serif; font-weight: 600; font-size: clamp(30px, 5vw, 44px); line-height: 1.15; margin: 0 0 18px; letter-spacing: -0.01em; }
+  .byline { color: var(--ink-2); margin: 0 0 22px; }
+  .byline strong { color: var(--ink); font-weight: 600; }
+  .links { display: flex; flex-wrap: wrap; gap: 10px; }
+  .links a {
+    display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--surface); color: var(--ink); text-decoration: none; font-size: 15px;
+  }
+  .links a:hover { border-color: var(--accent); color: var(--accent); }
+  .tldr {
+    margin: 34px 0 0; padding: 18px 22px; border-left: 3px solid var(--accent);
+    background: var(--surface); border-radius: 0 10px 10px 0; box-shadow: 0 0 0 1px var(--border);
+  }
+  .tldr b { display: block; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 4px; font-weight: 600; }
+  nav.toc { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--page) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+  nav.toc div { max-width: 860px; margin: 0 auto; padding: 10px 22px; display: flex; gap: 20px; overflow-x: auto; font-size: 14px; white-space: nowrap; }
+  nav.toc a { color: var(--ink-2); text-decoration: none; }
+  nav.toc a:hover { color: var(--ink); }
+  section { padding-top: 46px; }
+  h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; font-size: 27px; margin: 0 0 14px; scroll-margin-top: 60px; }
+  h3 { font-size: 17px; margin: 26px 0 8px; }
+  p { margin: 0 0 14px; }
+  a { color: var(--accent); }
+  .muted { color: var(--ink-2); }
+  .small { font-size: 14px; }
+  code { background: var(--code-bg); padding: 1px 6px; border-radius: 5px; font-size: .88em; }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 14px; line-height: 1.5; }
+  pre code { background: none; padding: 0; }
+  ul.clean { padding-left: 20px; margin: 0 0 14px; }
+  ul.clean li { margin-bottom: 6px; }
+  .card { background: var(--surface); border-radius: 14px; box-shadow: 0 0 0 1px var(--border); padding: 22px; margin: 18px 0; }
+  .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0; }
+  .stat { background: var(--surface); border-radius: 12px; box-shadow: 0 0 0 1px var(--border); padding: 16px 18px; }
+  .stat .num { font-size: 28px; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .stat .lbl { font-size: 14px; color: var(--ink-2); }
+
+  /* pipeline */
+  .pipeline { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; margin: 18px 0; }
+  .step { flex: 1 1 130px; background: var(--surface); border-radius: 12px; box-shadow: 0 0 0 1px var(--border); padding: 12px 14px; font-size: 14px; position: relative; }
+  .step b { display: block; font-size: 15px; margin-bottom: 2px; }
+  .step.trained { box-shadow: 0 0 0 2px var(--accent); }
+  .step .tag { font-size: 12px; color: var(--ink-2); }
+  .arrow { align-self: center; color: var(--ink-2); }
+
+  /* tables */
+  .table-wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; font-variant-numeric: tabular-nums; }
+  th, td { text-align: right; padding: 7px 10px; border-bottom: 1px solid var(--grid); }
+  th:first-child, td:first-child { text-align: left; }
+  th { font-weight: 600; color: var(--ink-2); font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+  tr.clean-row td { font-weight: 600; }
+
+  /* chart */
+  .chart-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
+  .chart-title { font-weight: 600; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 14px; color: var(--ink-2); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  .toggle { display: inline-flex; border-radius: 8px; box-shadow: 0 0 0 1px var(--border); overflow: hidden; font-size: 13px; }
+  .toggle button { background: var(--surface); color: var(--ink-2); border: 0; padding: 6px 12px; cursor: pointer; font: inherit; }
+  .toggle button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  #chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+  #chart text { fill: var(--ink-2); font-size: 12px; font-family: inherit; }
+  #chart .ylab { fill: var(--ink); font-size: 13px; }
+  .tip {
+    position: fixed; pointer-events: none; z-index: 20; background: var(--surface); color: var(--ink);
+    box-shadow: 0 0 0 1px var(--border), 0 6px 20px rgba(0,0,0,.15); border-radius: 8px;
+    padding: 8px 10px; font-size: 13px; line-height: 1.45; opacity: 0; transition: opacity .08s;
+  }
+  .tip .sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; }
+  .tabs { display: flex; gap: 6px; margin: 4px 0 10px; flex-wrap: wrap; }
+
+  /* demo */
+  .demo-row { display: grid; grid-template-columns: 90px 1fr 120px; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--grid); }
+  .demo-row audio { width: 100%; height: 34px; }
+  .score { font-variant-numeric: tabular-nums; text-align: right; }
+  .meter { height: 6px; border-radius: 3px; background: var(--grid); margin-top: 4px; overflow: hidden; }
+  .meter i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+
+  .refs li { margin-bottom: 8px; font-size: 15px; }
+  footer { max-width: 860px; margin: 0 auto; padding: 30px 22px 50px; color: var(--ink-2); font-size: 14px; border-top: 1px solid var(--border); }
+  .note { font-size: 14px; color: var(--ink-2); border: 1px dashed var(--axis); border-radius: 10px; padding: 12px 14px; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <p class="eyebrow">Audio Processing and Indexing · Leiden University · 2026</p>
+  <h1>Real Voice or AI Voice? Robust Detection of AI-Sung Chinese Songs</h1>
+  <p class="byline"><strong>Anqi Wang</strong> · MSc Computer Science (AI), Leiden University</p>
+  <div class="links">
+    <a href="https://github.com/anqiiiwang/real-or-ai-voice">Code on GitHub</a>
+    <a href="#results">Results</a>
+    <a href="#demo">Listen</a>
+  </div>
+  <div class="tldr">
+    <b>TL;DR</b>
+    Singing-voice deepfake detectors are evaluated on clean audio. We test them on Mandarin singing
+    after everyday edits (pitch shift, tempo change, noise, reverb). In our first experiments, every
+    edit roughly doubles the error rate. Noise and reverb make real singers look fake, and larger
+    pitch shifts let AI-sung clips pass as real.
+  </div>
+</header>
+
+<nav class="toc"><div>
+  <a href="#motivation">Motivation</a><a href="#data">Data</a><a href="#method">Method</a>
+  <a href="#setup">Experiments</a><a href="#results">Results</a><a href="#demo">Demo</a>
+  <a href="#limitations">Limitations</a><a href="#references">References</a><a href="#reproduce">Reproduce</a>
+</div></nav>
+
+<main>
+
+<section id="motivation">
+  <h2>Motivation</h2>
+  <p>Around 10% of the tracks delivered to the streaming platform Deezer are AI-generated [1].
+  Frohmann et al. [1] detect them from <em>lyrics transcripts</em>, which is robust to audio edits but only
+  catches AI-written lyrics. It has a blind spot: <strong>human-written songs sung by an AI voice</strong>,
+  such as AI covers.</p>
+  <p>Singing-voice deepfake detection (SVDD) targets exactly this case. Chinese datasets and strong
+  detectors exist [2, 3, 4], but they are evaluated on <strong>clean audio</strong>. Real AI covers are often
+  pitch-shifted, sped up, or mixed with reverb. Does detection survive those edits?</p>
+  <div class="card">
+    <h3 style="margin-top:0">Research questions</h3>
+    <ul class="clean">
+      <li><b>RQ1.</b> How much do pitch shift, tempo change, noise and reverb hurt a singing-voice deepfake detector?</li>
+      <li><b>RQ2.</b> Which edit hurts most, and why? Does it cause missed fakes or false alarms on real singers?</li>
+      <li><b>RQ3.</b> Do stronger or music-trained front ends make the detector more robust?</li>
+      <li><b>RQ4.</b> Can training with (different) edits recover the lost performance?</li>
+    </ul>
+  </div>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p>We use the Mandarin part of <strong>CtrSVDD</strong> [3], the dataset of the controlled track of the SVDD 2024
+  challenge [4]. Real vocals come from M4Singer and Opencpop. AI vocals are re-synthesised from the
+  same songs with several singing-voice synthesis and conversion systems.</p>
+  <div class="grid3">
+    <div class="stat"><div class="num">11</div><div class="lbl">Mandarin singers (10 M4Singer + 1 Opencpop)</div></div>
+    <div class="stat"><div class="num">14,581</div><div class="lbl">real (bona fide) clips</div></div>
+    <div class="stat"><div class="num">91,110</div><div class="lbl">AI-sung clips, 8 generation methods</div></div>
+  </div>
+  <p class="muted small">We use a balanced subset for training and testing: 1,000 real + 1,000 AI clips for training,
+  and 300 + 300 for testing. AI clips are spread evenly over the generation methods.</p>
+</section>
+
+<section id="method">
+  <h2>Method</h2>
+  <p>We follow the self-supervised front-end approach of Wang &amp; Yamagishi [5]. A pretrained model describes
+  the audio, and a simple classifier decides real or AI. <strong>Only the classifier is trained</strong>,
+  and the pretrained model stays frozen.</p>
+  <div class="pipeline" aria-label="Pipeline">
+    <div class="step"><b>4 s clip</b><span class="tag">16 kHz vocals</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>Edit</b><span class="tag">pitch · tempo · noise · reverb (test only)</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>Pretrained model</b><span class="tag">frozen · every layer, mean over time</span></div>
+    <div class="arrow">→</div>
+    <div class="step trained"><b>Logistic regression</b><span class="tag">trained · best layer by CV</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>Real / AI</b><span class="tag">score + threshold</span></div>
+  </div>
+  <h3>Front ends compared</h3>
+  <ul class="clean">
+    <li><b>wav2vec2-base</b>: a small speech model, used as our simple baseline.</li>
+    <li><b>WavLM-Large</b>: a large speech model of the kind used by top SVDD 2024 systems [4].</li>
+    <li><b>MERT-95M</b>: a model pretrained on music, to test whether music knowledge helps.</li>
+  </ul>
+</section>
+
+<section id="setup">
+  <h2>Experimental design</h2>
+  <p>Each comparison changes <strong>one thing at a time</strong> and keeps everything else fixed.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Experiment</th><th style="text-align:left">Control</th><th style="text-align:left">Treatment</th><th style="text-align:left">Held fixed</th></tr></thead>
+    <tbody>
+      <tr><td>A. Effect of edits</td><td style="text-align:left">clean test clips</td><td style="text-align:left">same clips, edited</td><td style="text-align:left">model, training data, test clips</td></tr>
+      <tr><td>B. Effect of front end</td><td style="text-align:left">wav2vec2-base</td><td style="text-align:left">WavLM-Large, MERT</td><td style="text-align:left">split, clips, classifier, edits</td></tr>
+      <tr><td>C. Augmentation</td><td style="text-align:left">train on clean</td><td style="text-align:left">train with edits</td><td style="text-align:left">model, test set</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Making the test fair</h3>
+  <ul class="clean">
+    <li><b>Unseen singers:</b> test singers never appear in training. The layer and the decision threshold are chosen by singer-grouped cross-validation on the training singers only.</li>
+    <li><b>Paired comparison:</b> the same test clips are used for every edit, so a drop can only come from the edit.</li>
+    <li><b>Different edits in training and testing</b> for the augmentation experiment (e.g. train with ±1 semitone, test with +2 to +6).</li>
+  </ul>
+  <h3>Edits</h3>
+  <p class="small muted">Pitch shift +1, +2, +4, +6 semitones · tempo ×0.8, ×1.2 · white noise at 20 and 10 dB SNR ·
+  synthetic room reverb with RT60 0.5 s and 1.0 s.</p>
+</section>
+
+<section id="results">
+  <h2>Results</h2>
+  <p>We report the <strong>equal error rate (EER)</strong>, the standard metric in deepfake detection (lower is better, and 0.5 means guessing).
+  We also report how often real and AI clips are classified correctly.</p>
+
+  <div class="card">
+    <div class="chart-head">
+      <div>
+        <div class="chart-title">EER on unseen singers, clean vs. edited</div>
+        <div class="small muted">Lower is better · dashed line = chance (0.5)</div>
+      </div>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div id="chart"></div>
+  </div>
+
+  <h3>Full numbers</h3>
+  <div class="tabs toggle" id="tabs" role="group" aria-label="Model"></div>
+  <div class="table-wrap"><table id="table"></table></div>
+
+  <h3>Findings so far</h3>
+  <ul class="clean" id="findings">
+    <li><b>Every edit hurts.</b> With wav2vec2-base, the EER rises from 0.18 on clean audio to 0.35–0.44 after editing. Strong reverb and noise come close to chance.</li>
+    <li><b>Noise, reverb and tempo cause false alarms.</b> Real singers are increasingly labelled as AI (real accuracy drops from 0.58 to almost 0 with noise).</li>
+    <li><b>Pitch shift hides fakes.</b> The larger the shift, the more AI clips pass as real (AI accuracy 0.93 → 0.81 from +1 to +6 semitones).</li>
+    <li><b>Lower layers work best.</b> The best layer is an early one (layer 3 of 12), consistent with synthesis artefacts living in low-level acoustic detail.</li>
+  </ul>
+  <p class="note">Preliminary: one front end, two test singers, one seed. Results for WavLM-Large and MERT, rotated test singers, and augmentation will be added.</p>
+</section>
+
+<section id="demo">
+  <h2>Listen: does pitch shift fool the detector?</h2>
+  <p>The same AI-sung clip, shifted up step by step. The bar shows the detector's "AI" score.</p>
+  <div class="card" id="demo-box">
+    <p class="note" style="margin:0">Audio examples will be added here.</p>
+  </div>
+</section>
+
+<section id="limitations">
+  <h2>Limitations</h2>
+  <ul class="clean">
+    <li>The detector is deliberately simple (frozen front end + linear classifier), not a state-of-the-art system.</li>
+    <li>Edits are simulated in code (librosa pitch shift and time stretch, synthetic reverb), so they approximate real production tools.</li>
+    <li>CtrSVDD contains isolated vocals. Real songs have accompaniment, which is future work (e.g. WildSVDD [4]).</li>
+    <li>Only a few Mandarin singers are available, so results can vary between test singers.</li>
+  </ul>
+</section>
+
+<section id="references">
+  <h2>References</h2>
+  <ol class="refs">
+    <li>M. Frohmann et al., "AI-Generated Song Detection via Lyrics Transcripts," <i>ISMIR</i>, 2025.</li>
+    <li>Y. Zang et al., "SingFake: Singing Voice Deepfake Detection," <i>ICASSP</i>, 2024.</li>
+    <li>Y. Zang et al., "CtrSVDD: A Benchmark Dataset and Baseline Analysis for Controlled Singing Voice Deepfake Detection," <i>Interspeech</i>, 2024.</li>
+    <li>Y. Zhang et al., "SVDD 2024: The Inaugural Singing Voice Deepfake Detection Challenge," <i>IEEE SLT</i>, 2024.</li>
+    <li>X. Wang and J. Yamagishi, "Investigating Self-Supervised Front Ends for Speech Spoofing Countermeasures," <i>Odyssey</i>, 2022.</li>
+  </ol>
+</section>
+
+<section id="reproduce">
+  <h2>Reproduce</h2>
+  <p>Download <code>dev.txt</code>, <code>dev_set.zip</code>, <code>train.txt</code> and <code>train_set.zip</code> from
+  <a href="https://zenodo.org/records/10467648">Zenodo</a> into <code>data/</code>, then:</p>
+<pre><code>pip install -r requirements.txt
+python baseline.py                                   # wav2vec2-base
+python baseline.py --model microsoft/wavlm-large
+python baseline.py --model m-a-p/MERT-v1-95M
+python make_site_data.py                             # update this page</code></pre>
+</section>
+
+</main>
+
+<footer>
+  Anqi Wang · Leiden University · Course project for Audio Processing and Indexing, 2026.
+  Data: CtrSVDD (Zang et al., 2024), used for research purposes.
+</footer>
+
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script src="data/results.js"></script>
+<script src="data/demo.js" onerror="void 0"></script>
+<script>
+(function () {
+  const R = window.RESULTS || [];
+  const css = getComputedStyle(document.documentElement);
+  const colorOf = i => css.getPropertyValue(["--s1", "--s2", "--s3"][i]).trim();
+  const tip = document.getElementById("tip");
+  const label = e => e === "clean" ? "Clean" : (() => {
+    const [k, v] = e.split(":");
+    return { pitch: `Pitch +${v} st`, tempo: `Tempo ×${v}`, noise: `Noise ${v} dB`, reverb: `Reverb ${v} s` }[k] || e;
+  })();
+  const fmt = x => x.toFixed(3);
+
+  if (!R.length) {
+    document.getElementById("chart").innerHTML = '<p class="note">No results yet. Run make_site_data.py.</p>';
+    return;
+  }
+
+  // ---------- legend (only for >= 2 series)
+  const legend = document.getElementById("legend");
+  if (R.length > 1) legend.innerHTML = R.map((m, i) => `<span><i style="background:${colorOf(i)}"></i>${m.model}</span>`).join("");
+
+  // ---------- grouped horizontal bar chart of EER
+  function drawChart() {
+    const edits = R[0].rows.map(r => r.edit);
+    const n = R.length;
+    const bh = n === 1 ? 14 : 10, gap = 2, groupPad = 12;
+    const groupH = n * bh + (n - 1) * gap + groupPad;
+    const W = 780, L = 112, Rm = 44, T = 8, B = 30;
+    const H = T + edits.length * groupH + B;
+    const x = v => L + (v / 0.5) * (W - L - Rm);
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Equal error rate per edit and model">`;
+    for (const t of [0, 0.1, 0.2, 0.3, 0.4, 0.5]) {
+      s += `<line x1="${x(t)}" x2="${x(t)}" y1="${T}" y2="${H - B}" stroke="var(--grid)" stroke-width="1" ${t === 0.5 ? 'stroke-dasharray="4 4" stroke="var(--axis)"' : ""}/>`;
+      s += `<text x="${x(t)}" y="${H - B + 18}" text-anchor="middle">${t.toFixed(1)}</text>`;
+    }
+    s += `<text x="${W - Rm}" y="${H - 1}" text-anchor="end">EER</text>`;
+    edits.forEach((e, gi) => {
+      const y0 = T + gi * groupH + groupPad / 2;
+      const mid = y0 + (n * bh + (n - 1) * gap) / 2;
+      s += `<text class="ylab" x="${L - 10}" y="${mid + 4}" text-anchor="end" ${e === "clean" ? 'font-weight="600"' : ""}>${label(e)}</text>`;
+      R.forEach((m, i) => {
+        const r = m.rows.find(q => q.edit === e); if (!r) return;
+        const y = y0 + i * (bh + gap), w = Math.max(1, x(r.eer) - L), rad = Math.min(4, bh / 2);
+        // bar anchored at the baseline, rounded data-end only
+        s += `<path d="M${L},${y} h${w - rad} a${rad},${rad} 0 0 1 ${rad},${rad} v${bh - 2 * rad} a${rad},${rad} 0 0 1 -${rad},${rad} h-${w - rad} z" fill="${colorOf(i)}"/>`;
+        if (n <= 1 || e === "clean") s += `<text x="${x(r.eer) + 5}" y="${y + bh / 2 + 4}">${fmt(r.eer)}</text>`;
+        s += `<rect x="${L}" y="${y - gap}" width="${W - L - Rm}" height="${bh + 2 * gap}" fill="transparent" data-m="${i}" data-e="${e}" class="hit"/>`;
+      });
+    });
+    s += `<line x1="${L}" x2="${L}" y1="${T}" y2="${H - B}" stroke="var(--axis)"/>`;
+    s += "</svg>";
+    const el = document.getElementById("chart");
+    el.innerHTML = s;
+    el.querySelectorAll(".hit").forEach(h => {
+      h.addEventListener("mousemove", ev => {
+        const m = R[+h.dataset.m], r = m.rows.find(q => q.edit === h.dataset.e);
+        tip.innerHTML = `<b>${label(r.edit)}</b><br><span class="sw" style="background:${colorOf(+h.dataset.m)}"></span>${m.model}<br>
+          EER ${fmt(r.eer)} · accuracy ${fmt(r.accuracy)}<br>real correct ${fmt(r.acc_real)} · AI correct ${fmt(r.acc_fake)}`;
+        tip.style.left = Math.min(ev.clientX + 14, innerWidth - 240) + "px";
+        tip.style.top = ev.clientY + 14 + "px";
+        tip.style.opacity = 1;
+      });
+      h.addEventListener("mouseleave", () => tip.style.opacity = 0);
+    });
+  }
+
+  // ---------- table with model tabs
+  function drawTable(mi) {
+    const m = R[mi];
+    document.getElementById("table").innerHTML =
+      `<thead><tr><th>Edit</th><th>EER</th><th>Accuracy</th><th>Real correct</th><th>AI correct</th></tr></thead><tbody>` +
+      m.rows.map(r => `<tr class="${r.edit === "clean" ? "clean-row" : ""}"><td>${label(r.edit)}</td><td>${fmt(r.eer)}</td><td>${fmt(r.accuracy)}</td><td>${fmt(r.acc_real)}</td><td>${fmt(r.acc_fake)}</td></tr>`).join("") +
+      "</tbody>";
+    document.querySelectorAll("#tabs button").forEach((b, i) => b.setAttribute("aria-pressed", i === mi));
+  }
+  const tabs = document.getElementById("tabs");
+  if (R.length > 1) {
+    tabs.innerHTML = R.map((m, i) => `<button type="button">${m.model}</button>`).join("");
+    tabs.querySelectorAll("button").forEach((b, i) => b.onclick = () => drawTable(i));
+  } else tabs.style.display = "none";
+
+  drawChart(); drawTable(0);
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => location.reload());
+
+  // ---------- optional audio demo (docs/data/demo.js sets window.DEMO = [{label, file, score}])
+  const D = window.DEMO;
+  if (D && D.length) {
+    document.getElementById("demo-box").innerHTML = D.map(d => `
+      <div class="demo-row"><div>${d.label}</div><audio controls preload="none" src="${d.file}"></audio>
+      <div class="score">AI score ${d.score.toFixed(2)}<div class="meter"><i style="width:${(d.score * 100).toFixed(0)}%"></i></div></div></div>`).join("");
+  }
+})();
+</script>
+</body>
+</html>
