@@ -380,5 +380,384 @@ window.RESULTS = {
    ]
   }
  ],
- "attn": []
+ "attn": [
+  {
+   "model": "wav2vec2-base",
+   "rows": [
+    {
+     "edit": "clean",
+     "eer": 0.127,
+     "eer_std": 0.041,
+     "accuracy": 0.818,
+     "accuracy_std": 0.04,
+     "acc_real": 0.769,
+     "acc_real_std": 0.159,
+     "acc_fake": 0.866,
+     "acc_fake_std": 0.082
+    },
+    {
+     "edit": "pitch:1",
+     "eer": 0.294,
+     "eer_std": 0.039,
+     "accuracy": 0.612,
+     "accuracy_std": 0.079,
+     "acc_real": 0.375,
+     "acc_real_std": 0.29,
+     "acc_fake": 0.848,
+     "acc_fake_std": 0.148
+    },
+    {
+     "edit": "pitch:2",
+     "eer": 0.301,
+     "eer_std": 0.049,
+     "accuracy": 0.603,
+     "accuracy_std": 0.072,
+     "acc_real": 0.37,
+     "acc_real_std": 0.291,
+     "acc_fake": 0.835,
+     "acc_fake_std": 0.167
+    },
+    {
+     "edit": "pitch:4",
+     "eer": 0.327,
+     "eer_std": 0.043,
+     "accuracy": 0.606,
+     "accuracy_std": 0.06,
+     "acc_real": 0.441,
+     "acc_real_std": 0.322,
+     "acc_fake": 0.77,
+     "acc_fake_std": 0.219
+    },
+    {
+     "edit": "pitch:6",
+     "eer": 0.341,
+     "eer_std": 0.036,
+     "accuracy": 0.601,
+     "accuracy_std": 0.055,
+     "acc_real": 0.497,
+     "acc_real_std": 0.327,
+     "acc_fake": 0.704,
+     "acc_fake_std": 0.269
+    },
+    {
+     "edit": "tempo:0.8",
+     "eer": 0.312,
+     "eer_std": 0.028,
+     "accuracy": 0.611,
+     "accuracy_std": 0.07,
+     "acc_real": 0.416,
+     "acc_real_std": 0.296,
+     "acc_fake": 0.805,
+     "acc_fake_std": 0.159
+    },
+    {
+     "edit": "tempo:1.2",
+     "eer": 0.275,
+     "eer_std": 0.034,
+     "accuracy": 0.619,
+     "accuracy_std": 0.086,
+     "acc_real": 0.406,
+     "acc_real_std": 0.313,
+     "acc_fake": 0.832,
+     "acc_fake_std": 0.148
+    },
+    {
+     "edit": "noise:20",
+     "eer": 0.356,
+     "eer_std": 0.036,
+     "accuracy": 0.511,
+     "accuracy_std": 0.011,
+     "acc_real": 0.024,
+     "acc_real_std": 0.023,
+     "acc_fake": 0.998,
+     "acc_fake_std": 0.002
+    },
+    {
+     "edit": "noise:10",
+     "eer": 0.392,
+     "eer_std": 0.016,
+     "accuracy": 0.504,
+     "accuracy_std": 0.005,
+     "acc_real": 0.01,
+     "acc_real_std": 0.014,
+     "acc_fake": 0.998,
+     "acc_fake_std": 0.004
+    },
+    {
+     "edit": "reverb:0.5",
+     "eer": 0.304,
+     "eer_std": 0.028,
+     "accuracy": 0.649,
+     "accuracy_std": 0.051,
+     "acc_real": 0.57,
+     "acc_real_std": 0.289,
+     "acc_fake": 0.728,
+     "acc_fake_std": 0.202
+    },
+    {
+     "edit": "reverb:1.0",
+     "eer": 0.333,
+     "eer_std": 0.029,
+     "accuracy": 0.616,
+     "accuracy_std": 0.037,
+     "acc_real": 0.544,
+     "acc_real_std": 0.288,
+     "acc_fake": 0.687,
+     "acc_fake_std": 0.245
+    }
+   ]
+  },
+  {
+   "model": "WavLM-Large",
+   "rows": [
+    {
+     "edit": "clean",
+     "eer": 0.07,
+     "eer_std": 0.022,
+     "accuracy": 0.891,
+     "accuracy_std": 0.045,
+     "acc_real": 0.823,
+     "acc_real_std": 0.11,
+     "acc_fake": 0.96,
+     "acc_fake_std": 0.034
+    },
+    {
+     "edit": "pitch:1",
+     "eer": 0.382,
+     "eer_std": 0.039,
+     "accuracy": 0.499,
+     "accuracy_std": 0.001,
+     "acc_real": 0.001,
+     "acc_real_std": 0.002,
+     "acc_fake": 0.998,
+     "acc_fake_std": 0.004
+    },
+    {
+     "edit": "pitch:2",
+     "eer": 0.378,
+     "eer_std": 0.051,
+     "accuracy": 0.5,
+     "accuracy_std": 0.0,
+     "acc_real": 0.001,
+     "acc_real_std": 0.002,
+     "acc_fake": 0.999,
+     "acc_fake_std": 0.002
+    },
+    {
+     "edit": "pitch:4",
+     "eer": 0.383,
+     "eer_std": 0.054,
+     "accuracy": 0.5,
+     "accuracy_std": 0.002,
+     "acc_real": 0.003,
+     "acc_real_std": 0.002,
+     "acc_fake": 0.998,
+     "acc_fake_std": 0.004
+    },
+    {
+     "edit": "pitch:6",
+     "eer": 0.411,
+     "eer_std": 0.045,
+     "accuracy": 0.501,
+     "accuracy_std": 0.003,
+     "acc_real": 0.005,
+     "acc_real_std": 0.004,
+     "acc_fake": 0.998,
+     "acc_fake_std": 0.004
+    },
+    {
+     "edit": "tempo:0.8",
+     "eer": 0.372,
+     "eer_std": 0.047,
+     "accuracy": 0.5,
+     "accuracy_std": 0.001,
+     "acc_real": 0.003,
+     "acc_real_std": 0.004,
+     "acc_fake": 0.998,
+     "acc_fake_std": 0.004
+    },
+    {
+     "edit": "tempo:1.2",
+     "eer": 0.369,
+     "eer_std": 0.056,
+     "accuracy": 0.499,
+     "accuracy_std": 0.001,
+     "acc_real": 0.0,
+     "acc_real_std": 0.0,
+     "acc_fake": 0.999,
+     "acc_fake_std": 0.002
+    },
+    {
+     "edit": "noise:20",
+     "eer": 0.225,
+     "eer_std": 0.042,
+     "accuracy": 0.607,
+     "accuracy_std": 0.076,
+     "acc_real": 0.237,
+     "acc_real_std": 0.179,
+     "acc_fake": 0.977,
+     "acc_fake_std": 0.032
+    },
+    {
+     "edit": "noise:10",
+     "eer": 0.322,
+     "eer_std": 0.035,
+     "accuracy": 0.541,
+     "accuracy_std": 0.05,
+     "acc_real": 0.107,
+     "acc_real_std": 0.136,
+     "acc_fake": 0.976,
+     "acc_fake_std": 0.037
+    },
+    {
+     "edit": "reverb:0.5",
+     "eer": 0.311,
+     "eer_std": 0.049,
+     "accuracy": 0.5,
+     "accuracy_std": 0.001,
+     "acc_real": 0.002,
+     "acc_real_std": 0.004,
+     "acc_fake": 0.999,
+     "acc_fake_std": 0.002
+    },
+    {
+     "edit": "reverb:1.0",
+     "eer": 0.38,
+     "eer_std": 0.037,
+     "accuracy": 0.5,
+     "accuracy_std": 0.0,
+     "acc_real": 0.001,
+     "acc_real_std": 0.002,
+     "acc_fake": 0.999,
+     "acc_fake_std": 0.002
+    }
+   ]
+  },
+  {
+   "model": "MERT-95M",
+   "rows": [
+    {
+     "edit": "clean",
+     "eer": 0.121,
+     "eer_std": 0.029,
+     "accuracy": 0.825,
+     "accuracy_std": 0.063,
+     "acc_real": 0.744,
+     "acc_real_std": 0.179,
+     "acc_fake": 0.905,
+     "acc_fake_std": 0.082
+    },
+    {
+     "edit": "pitch:1",
+     "eer": 0.198,
+     "eer_std": 0.02,
+     "accuracy": 0.728,
+     "accuracy_std": 0.089,
+     "acc_real": 0.61,
+     "acc_real_std": 0.273,
+     "acc_fake": 0.846,
+     "acc_fake_std": 0.107
+    },
+    {
+     "edit": "pitch:2",
+     "eer": 0.233,
+     "eer_std": 0.029,
+     "accuracy": 0.716,
+     "accuracy_std": 0.071,
+     "acc_real": 0.646,
+     "acc_real_std": 0.245,
+     "acc_fake": 0.785,
+     "acc_fake_std": 0.132
+    },
+    {
+     "edit": "pitch:4",
+     "eer": 0.249,
+     "eer_std": 0.025,
+     "accuracy": 0.715,
+     "accuracy_std": 0.013,
+     "acc_real": 0.847,
+     "acc_real_std": 0.15,
+     "acc_fake": 0.583,
+     "acc_fake_std": 0.163
+    },
+    {
+     "edit": "pitch:6",
+     "eer": 0.241,
+     "eer_std": 0.034,
+     "accuracy": 0.671,
+     "accuracy_std": 0.039,
+     "acc_real": 0.897,
+     "acc_real_std": 0.145,
+     "acc_fake": 0.446,
+     "acc_fake_std": 0.189
+    },
+    {
+     "edit": "tempo:0.8",
+     "eer": 0.189,
+     "eer_std": 0.018,
+     "accuracy": 0.747,
+     "accuracy_std": 0.087,
+     "acc_real": 0.652,
+     "acc_real_std": 0.276,
+     "acc_fake": 0.842,
+     "acc_fake_std": 0.118
+    },
+    {
+     "edit": "tempo:1.2",
+     "eer": 0.183,
+     "eer_std": 0.028,
+     "accuracy": 0.759,
+     "accuracy_std": 0.077,
+     "acc_real": 0.684,
+     "acc_real_std": 0.244,
+     "acc_fake": 0.835,
+     "acc_fake_std": 0.119
+    },
+    {
+     "edit": "noise:20",
+     "eer": 0.295,
+     "eer_std": 0.051,
+     "accuracy": 0.524,
+     "accuracy_std": 0.025,
+     "acc_real": 0.066,
+     "acc_real_std": 0.067,
+     "acc_fake": 0.983,
+     "acc_fake_std": 0.027
+    },
+    {
+     "edit": "noise:10",
+     "eer": 0.378,
+     "eer_std": 0.055,
+     "accuracy": 0.512,
+     "accuracy_std": 0.018,
+     "acc_real": 0.077,
+     "acc_real_std": 0.093,
+     "acc_fake": 0.948,
+     "acc_fake_std": 0.067
+    },
+    {
+     "edit": "reverb:0.5",
+     "eer": 0.225,
+     "eer_std": 0.032,
+     "accuracy": 0.709,
+     "accuracy_std": 0.091,
+     "acc_real": 0.613,
+     "acc_real_std": 0.305,
+     "acc_fake": 0.804,
+     "acc_fake_std": 0.138
+    },
+    {
+     "edit": "reverb:1.0",
+     "eer": 0.281,
+     "eer_std": 0.024,
+     "accuracy": 0.651,
+     "accuracy_std": 0.083,
+     "acc_real": 0.535,
+     "acc_real_std": 0.337,
+     "acc_fake": 0.768,
+     "acc_fake_std": 0.187
+    }
+   ]
+  }
+ ]
 };

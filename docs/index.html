@@ -255,9 +255,10 @@
     <li><b>The failure direction depends on the front end.</b> WavLM fails with false alarms on real singers. MERT fails the other way: under pitch shift, tempo change and reverb, real clips stay correct but AI clips pass as real (AI correct falls from 0.87 to 0.23 at +6 semitones). Noise causes false alarms for all three models.</li>
     <li><b>No model wins everywhere.</b> MERT is most robust to pitch and tempo changes (EER 0.22–0.29 vs. 0.28–0.39), WavLM to noise (0.20 and 0.29), and on reverb no model is clearly better.</li>
     <li><b>The differences are larger than the singer-to-singer variation.</b> For example, at +1 semitone, the EER is 0.343 ± 0.022 for WavLM and 0.237 ± 0.016 for MERT. On clean audio, wav2vec2 and MERT cannot be told apart.</li>
+    <li><b>A stronger head does not fix it.</b> With an attentive pooling head (toggle above the chart), the clean EER stays the same (WavLM 0.070, MERT 0.122), and WavLM still labels over 99% of real clips as AI after pitch shift, tempo change or reverb. For MERT, the head lowers the EER under pitch, tempo and reverb by 0.03–0.07, but it stays well above the clean level. The collapse comes from the pretrained features, not from the simple classifier.</li>
     <li><b>Shallow-to-middle layers work best.</b> The layers chosen are 1–2 of 12 (wav2vec2), 4–5 of 12 (MERT) and 6–10 of 24 (WavLM), in line with [6], where middle layers beat the last layer.</li>
   </ul>
-  <p class="note">Next: a stronger, attention-based detection head (does it fix the collapse?) and training with augmentation.</p>
+  <p class="note">Next: training with augmentation (edits in training that differ from the test edits).</p>
 </section>
 
 <section id="demo">

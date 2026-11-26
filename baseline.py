@@ -158,6 +158,13 @@ class Extractor:
 
     @torch.no_grad()
     def __call__(self, wavs):
+        hs = self.hidden(wavs)
+        # (layers, batch, dim): mean over time for every layer
+        return torch.stack([h.mean(dim=1) for h in hs]).permute(1, 0, 2).float().cpu().numpy()
+
+    @torch.no_grad()
+    def hidden(self, wavs):
+        """List of per-layer hidden states, each (batch, time, dim)."""
         x = self.fe(wavs, sampling_rate=self.sr, return_tensors="pt")
         x = {k: v.to(self.device) for k, v in x.items()}
         if self.force_hooks:
@@ -172,8 +179,7 @@ class Extractor:
                 # Fall back to reading every transformer layer's output with forward hooks.
                 self.force_hooks = True
                 hs = self._hidden_states_via_hooks(x)
-        # (layers, batch, dim): mean over time for every layer
-        return torch.stack([h.mean(dim=1) for h in hs]).permute(1, 0, 2).float().cpu().numpy()
+        return hs
 
 
 def cache_path(out, tag, split, edit, rows, args):

@@ -1,0 +1,33 @@
+device=mps  model=m-a-p/MERT-v1-95M  head=attentive pooling
+layer per fold: [4, 5, 5, 4, 5]
+  frames       clean: (2200, 74, 768)  (67s)
+  frames     pitch:1: (2200, 74, 768)  (153s)
+  frames     pitch:2: (2200, 74, 768)  (240s)
+  frames     pitch:4: (2200, 74, 768)  (330s)
+  frames     pitch:6: (2200, 74, 768)  (422s)
+  frames   tempo:0.8: (2200, 74, 768)  (510s)
+  frames   tempo:1.2: (2200, 74, 768)  (592s)
+  frames    noise:20: (2200, 74, 768)  (654s)
+  frames    noise:10: (2200, 74, 768)  (717s)
+  frames  reverb:0.5: (2200, 74, 768)  (783s)
+  frames  reverb:1.0: (2200, 74, 768)  (850s)
+fold 1: layer  4  val singer CtrSVDD_0052  clean EER 0.135
+fold 2: layer  5  val singer CtrSVDD_0053  clean EER 0.115
+fold 3: layer  5  val singer CtrSVDD_0054  clean EER 0.160
+fold 4: layer  4  val singer CtrSVDD_0057  clean EER 0.125
+fold 5: layer  5  val singer CtrSVDD_0110  clean EER 0.072
+
+        edit   EER (mean ± std)           acc       real ok       fake ok
+       clean     0.122 ± 0.029  0.824 ± 0.063  0.744 ± 0.179  0.905 ± 0.082
+     pitch:1     0.198 ± 0.020  0.728 ± 0.089  0.610 ± 0.273  0.846 ± 0.107
+     pitch:2     0.233 ± 0.029  0.715 ± 0.071  0.646 ± 0.245  0.785 ± 0.132
+     pitch:4     0.249 ± 0.025  0.715 ± 0.013  0.847 ± 0.150  0.583 ± 0.163
+     pitch:6     0.241 ± 0.034  0.671 ± 0.039  0.897 ± 0.145  0.446 ± 0.189
+   tempo:0.8     0.188 ± 0.018  0.747 ± 0.087  0.652 ± 0.276  0.842 ± 0.119
+   tempo:1.2     0.183 ± 0.028  0.760 ± 0.077  0.684 ± 0.244  0.835 ± 0.119
+    noise:20     0.295 ± 0.051  0.524 ± 0.025  0.066 ± 0.067  0.983 ± 0.027
+    noise:10     0.378 ± 0.055  0.513 ± 0.018  0.077 ± 0.093  0.948 ± 0.067
+  reverb:0.5     0.225 ± 0.032  0.709 ± 0.091  0.613 ± 0.305  0.804 ± 0.138
+  reverb:1.0     0.281 ± 0.024  0.652 ± 0.083  0.535 ± 0.337  0.768 ± 0.187
+
+saved results/MERT-v1-95M_attn_summary.csv   total time 859s

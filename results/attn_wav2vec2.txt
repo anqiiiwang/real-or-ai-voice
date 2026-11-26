@@ -1,0 +1,33 @@
+device=mps  model=facebook/wav2vec2-base  head=attentive pooling
+layer per fold: [2, 2, 2, 2, 1]
+  frames       clean: (2200, 49, 768)  (40s)
+  frames     pitch:1: (2200, 49, 768)  (99s)
+  frames     pitch:2: (2200, 49, 768)  (158s)
+  frames     pitch:4: (2200, 49, 768)  (219s)
+  frames     pitch:6: (2200, 49, 768)  (282s)
+  frames   tempo:0.8: (2200, 49, 768)  (341s)
+  frames   tempo:1.2: (2200, 49, 768)  (397s)
+  frames    noise:20: (2200, 49, 768)  (438s)
+  frames    noise:10: (2200, 49, 768)  (479s)
+  frames  reverb:0.5: (2200, 49, 768)  (523s)
+  frames  reverb:1.0: (2200, 49, 768)  (569s)
+fold 1: layer  2  val singer CtrSVDD_0052  clean EER 0.200
+fold 2: layer  2  val singer CtrSVDD_0053  clean EER 0.133
+fold 3: layer  2  val singer CtrSVDD_0054  clean EER 0.097
+fold 4: layer  2  val singer CtrSVDD_0057  clean EER 0.080
+fold 5: layer  1  val singer CtrSVDD_0110  clean EER 0.125
+
+        edit   EER (mean ± std)           acc       real ok       fake ok
+       clean     0.127 ± 0.041  0.818 ± 0.040  0.769 ± 0.159  0.866 ± 0.082
+     pitch:1     0.294 ± 0.039  0.612 ± 0.079  0.375 ± 0.290  0.848 ± 0.148
+     pitch:2     0.301 ± 0.049  0.603 ± 0.072  0.370 ± 0.291  0.835 ± 0.167
+     pitch:4     0.326 ± 0.043  0.605 ± 0.060  0.441 ± 0.322  0.770 ± 0.219
+     pitch:6     0.341 ± 0.036  0.601 ± 0.055  0.497 ± 0.327  0.704 ± 0.269
+   tempo:0.8     0.312 ± 0.028  0.611 ± 0.070  0.416 ± 0.297  0.805 ± 0.159
+   tempo:1.2     0.275 ± 0.034  0.619 ± 0.086  0.406 ± 0.313  0.832 ± 0.148
+    noise:20     0.356 ± 0.037  0.511 ± 0.011  0.024 ± 0.023  0.998 ± 0.002
+    noise:10     0.392 ± 0.016  0.504 ± 0.005  0.010 ± 0.014  0.998 ± 0.004
+  reverb:0.5     0.304 ± 0.028  0.649 ± 0.051  0.570 ± 0.289  0.728 ± 0.202
+  reverb:1.0     0.333 ± 0.029  0.615 ± 0.037  0.544 ± 0.288  0.687 ± 0.245
+
+saved results/wav2vec2-base_attn_summary.csv   total time 579s

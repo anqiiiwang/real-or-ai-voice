@@ -27,8 +27,26 @@ from sklearn.model_selection import GroupKFold, cross_val_predict, cross_val_sco
 import baseline as B
 
 
-def main():
-    ap = argparse.ArgumentParser()
+def build_pool_and_folds(args, rng):
+    """Fixed pool (per singer N real + N AI, AI spread over attacks) and the singer folds.
+    Shared with attn_head.py so both scripts use exactly the same clips and folds."""
+    sources = set(args.sources.split(","))
+    files, rows = {}, []
+    for txt, audio in zip(args.txt, args.audio):
+        files.update({p.stem: p for p in Path(audio).rglob("*.flac")})
+        rows += B.read_labels(txt, sources)
+    rows = [r for r in rows if r["name"] in files]
+    singers = sorted({(r["source"], r["singer"]) for r in rows})
+    pool = []
+    for src, s in singers:
+        pool += B.balanced_subset([r for r in rows if r["singer"] == s], args.per_singer, rng)
+    rot = [s for src, s in singers if src == args.rotate_source]
+    rng.shuffle(rot)
+    folds = [sorted(rot[i::args.folds]) for i in range(args.folds)]
+    return files, pool, singers, folds
+
+
+def add_common_args(ap):
     ap.add_argument("--txt", nargs="+", default=["data/dev.txt", "data/train.txt"])
     ap.add_argument("--audio", nargs="+", default=["data/dev_set", "data/train_set"])
     ap.add_argument("--sources", default="m4singer,opencpop")
@@ -41,6 +59,11 @@ def main():
     ap.add_argument("--edits", default=B.DEFAULT_EDITS)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default="results")
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    add_common_args(ap)
     args = ap.parse_args()
 
     rng = random.Random(args.seed)
@@ -49,25 +72,9 @@ def main():
     tag = args.model.split("/")[-1]
     edits = args.edits.split(",")
 
-    # --- fixed pool: per singer, N real + N AI (AI spread over attack types)
-    sources = set(args.sources.split(","))
-    files, rows = {}, []
-    for txt, audio in zip(args.txt, args.audio):
-        files.update({p.stem: p for p in Path(audio).rglob("*.flac")})
-        rows += B.read_labels(txt, sources)
-    rows = [r for r in rows if r["name"] in files]
-    singers = sorted({(r["source"], r["singer"]) for r in rows})
-    pool = []
-    for src, s in singers:
-        pool += B.balanced_subset([r for r in rows if r["singer"] == s], args.per_singer, rng)
-
+    files, pool, singers, folds = build_pool_and_folds(args, rng)
     y = np.array([r["label"] == "deepfake" for r in pool], int)
     singer_of = np.array([r["singer"] for r in pool])
-
-    # --- folds over the rotate-source singers
-    rot = [s for src, s in singers if src == args.rotate_source]
-    rng.shuffle(rot)
-    folds = [sorted(rot[i::args.folds]) for i in range(args.folds)]
     print(f"device={device}  model={args.model}")
     print(f"pool: {len(pool)} clips from {len(singers)} singers")
     for i, f in enumerate(folds):
