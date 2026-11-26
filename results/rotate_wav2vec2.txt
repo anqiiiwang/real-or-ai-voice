@@ -1,0 +1,40 @@
+device=mps  model=facebook/wav2vec2-base
+pool: 2200 clips from 11 singers
+  fold 1: test singers ['CtrSVDD_0055', 'CtrSVDD_0113']
+  fold 2: test singers ['CtrSVDD_0110', 'CtrSVDD_0111']
+  fold 3: test singers ['CtrSVDD_0057', 'CtrSVDD_0112']
+  fold 4: test singers ['CtrSVDD_0054', 'CtrSVDD_0056']
+  fold 5: test singers ['CtrSVDD_0052', 'CtrSVDD_0053']
+extracting 2200 clips x 11 conditions (cached after the first run)
+
+  features       clean: (2200, 13, 768)  (45s)
+  features     pitch:1: (2200, 13, 768)  (105s)
+  features     pitch:2: (2200, 13, 768)  (165s)
+  features     pitch:4: (2200, 13, 768)  (227s)
+  features     pitch:6: (2200, 13, 768)  (292s)
+  features   tempo:0.8: (2200, 13, 768)  (352s)
+  features   tempo:1.2: (2200, 13, 768)  (409s)
+  features    noise:20: (2200, 13, 768)  (453s)
+  features    noise:10: (2200, 13, 768)  (497s)
+  features  reverb:0.5: (2200, 13, 768)  (543s)
+  features  reverb:1.0: (2200, 13, 768)  (590s)
+fold 1: layer  2  clean EER 0.158
+fold 2: layer  2  clean EER 0.100
+fold 3: layer  2  clean EER 0.120
+fold 4: layer  2  clean EER 0.100
+fold 5: layer  1  clean EER 0.165
+
+        edit   EER (mean ± std)           acc       real ok       fake ok
+       clean     0.129 ± 0.028  0.848 ± 0.042  0.852 ± 0.114  0.844 ± 0.099
+     pitch:1     0.290 ± 0.049  0.642 ± 0.046  0.430 ± 0.192  0.855 ± 0.130
+     pitch:2     0.294 ± 0.051  0.629 ± 0.052  0.414 ± 0.203  0.845 ± 0.135
+     pitch:4     0.324 ± 0.045  0.659 ± 0.055  0.580 ± 0.235  0.739 ± 0.160
+     pitch:6     0.351 ± 0.051  0.645 ± 0.034  0.699 ± 0.217  0.590 ± 0.193
+   tempo:0.8     0.297 ± 0.038  0.666 ± 0.047  0.527 ± 0.191  0.806 ± 0.117
+   tempo:1.2     0.279 ± 0.040  0.661 ± 0.055  0.475 ± 0.200  0.846 ± 0.128
+    noise:20     0.339 ± 0.044  0.526 ± 0.032  0.064 ± 0.084  0.989 ± 0.020
+    noise:10     0.416 ± 0.027  0.516 ± 0.025  0.050 ± 0.073  0.983 ± 0.024
+  reverb:0.5     0.292 ± 0.036  0.693 ± 0.044  0.699 ± 0.236  0.686 ± 0.190
+  reverb:1.0     0.320 ± 0.024  0.622 ± 0.044  0.654 ± 0.321  0.589 ± 0.261
+
+saved results/wav2vec2-base_rotate_summary.csv and per-fold results   total time 595s

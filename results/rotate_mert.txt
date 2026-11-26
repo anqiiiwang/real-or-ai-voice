@@ -1,0 +1,40 @@
+device=mps  model=m-a-p/MERT-v1-95M
+pool: 2200 clips from 11 singers
+  fold 1: test singers ['CtrSVDD_0055', 'CtrSVDD_0113']
+  fold 2: test singers ['CtrSVDD_0110', 'CtrSVDD_0111']
+  fold 3: test singers ['CtrSVDD_0057', 'CtrSVDD_0112']
+  fold 4: test singers ['CtrSVDD_0054', 'CtrSVDD_0056']
+  fold 5: test singers ['CtrSVDD_0052', 'CtrSVDD_0053']
+extracting 2200 clips x 11 conditions (cached after the first run)
+
+  features       clean: (2200, 13, 768)  (63s)
+  features     pitch:1: (2200, 13, 768)  (150s)
+  features     pitch:2: (2200, 13, 768)  (238s)
+  features     pitch:4: (2200, 13, 768)  (329s)
+  features     pitch:6: (2200, 13, 768)  (422s)
+  features   tempo:0.8: (2200, 13, 768)  (512s)
+  features   tempo:1.2: (2200, 13, 768)  (595s)
+  features    noise:20: (2200, 13, 768)  (659s)
+  features    noise:10: (2200, 13, 768)  (724s)
+  features  reverb:0.5: (2200, 13, 768)  (792s)
+  features  reverb:1.0: (2200, 13, 768)  (861s)
+fold 1: layer  4  clean EER 0.165
+fold 2: layer  5  clean EER 0.095
+fold 3: layer  5  clean EER 0.097
+fold 4: layer  4  clean EER 0.128
+fold 5: layer  5  clean EER 0.095
+
+        edit   EER (mean ± std)           acc       real ok       fake ok
+       clean     0.116 ± 0.027  0.866 ± 0.043  0.863 ± 0.093  0.870 ± 0.063
+     pitch:1     0.237 ± 0.016  0.758 ± 0.010  0.858 ± 0.131  0.659 ± 0.134
+     pitch:2     0.266 ± 0.012  0.712 ± 0.040  0.906 ± 0.081  0.518 ± 0.154
+     pitch:4     0.286 ± 0.013  0.642 ± 0.039  0.978 ± 0.022  0.305 ± 0.097
+     pitch:6     0.280 ± 0.018  0.611 ± 0.038  0.992 ± 0.008  0.230 ± 0.079
+   tempo:0.8     0.231 ± 0.013  0.738 ± 0.030  0.860 ± 0.123  0.617 ± 0.165
+   tempo:1.2     0.218 ± 0.022  0.754 ± 0.029  0.873 ± 0.114  0.635 ± 0.136
+    noise:20     0.302 ± 0.038  0.633 ± 0.056  0.360 ± 0.141  0.907 ± 0.055
+    noise:10     0.360 ± 0.041  0.625 ± 0.051  0.525 ± 0.181  0.724 ± 0.118
+  reverb:0.5     0.291 ± 0.019  0.677 ± 0.040  0.852 ± 0.149  0.501 ± 0.194
+  reverb:1.0     0.331 ± 0.024  0.637 ± 0.045  0.845 ± 0.161  0.429 ± 0.233
+
+saved results/MERT-v1-95M_rotate_summary.csv and per-fold results   total time 865s
