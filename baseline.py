@@ -123,14 +123,55 @@ class Extractor:
     def __init__(self, name, device):
         self.fe = AutoFeatureExtractor.from_pretrained(name, trust_remote_code=True)
         self.model = AutoModel.from_pretrained(name, trust_remote_code=True).to(device).eval()
+        # some remote-code models (e.g. MERT) ignore the call argument and only read the config
+        self.model.config.output_hidden_states = True
+        self.model.config.return_dict = True
         self.sr = self.fe.sampling_rate
         self.device = device
+        self.force_hooks = False
+
+    def _layers(self):
+        """The ModuleList holding the transformer layers (e.g. model.encoder.layers)."""
+        cands = [(n, m) for n, m in self.model.named_modules()
+                 if isinstance(m, torch.nn.ModuleList) and n.endswith("layers") and "conv" not in n
+                 and len(m) >= 2]
+        if not cands:
+            raise RuntimeError("Could not find the transformer layers of this model.")
+        return min(cands, key=lambda c: c[0].count("."))[1]
+
+    def _hidden_states_via_hooks(self, x):
+        captured = []
+        layers = self._layers()
+        # input of the first layer = embedding output ("layer 0"), then each layer's output
+        handles = [layers[0].register_forward_pre_hook(
+            lambda m, args, kwargs: captured.append(args[0] if args else kwargs["hidden_states"]),
+            with_kwargs=True)]
+        for layer in layers:
+            handles.append(layer.register_forward_hook(
+                lambda m, inp, out: captured.append(out[0] if isinstance(out, (tuple, list)) else out)))
+        try:
+            self.model(**x)
+        finally:
+            for h in handles:
+                h.remove()
+        return captured
 
     @torch.no_grad()
     def __call__(self, wavs):
         x = self.fe(wavs, sampling_rate=self.sr, return_tensors="pt")
         x = {k: v.to(self.device) for k, v in x.items()}
-        hs = self.model(**x, output_hidden_states=True).hidden_states
+        if self.force_hooks:
+            hs = self._hidden_states_via_hooks(x)
+        else:
+            out = self.model(**x, output_hidden_states=True)
+            hs = getattr(out, "hidden_states", None)
+            if hs is None and isinstance(out, (tuple, list)):  # old-style tuple output
+                hs = next((o for o in out if isinstance(o, (tuple, list)) and len(o) > 1), None)
+            if hs is None:
+                # e.g. MERT's own code + transformers 5: the model ignores output_hidden_states.
+                # Fall back to reading every transformer layer's output with forward hooks.
+                self.force_hooks = True
+                hs = self._hidden_states_via_hooks(x)
         # (layers, batch, dim): mean over time for every layer
         return torch.stack([h.mean(dim=1) for h in hs]).permute(1, 0, 2).float().cpu().numpy()
 

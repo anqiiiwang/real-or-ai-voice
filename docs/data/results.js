@@ -163,5 +163,87 @@ window.RESULTS = [
     "acc_fake": 1.0
    }
   ]
+ },
+ {
+  "model": "MERT-95M",
+  "rows": [
+   {
+    "edit": "clean",
+    "accuracy": 0.808,
+    "eer": 0.16,
+    "acc_real": 0.707,
+    "acc_fake": 0.91
+   },
+   {
+    "edit": "pitch:1",
+    "accuracy": 0.723,
+    "eer": 0.227,
+    "acc_real": 0.54,
+    "acc_fake": 0.907
+   },
+   {
+    "edit": "pitch:2",
+    "accuracy": 0.728,
+    "eer": 0.22,
+    "acc_real": 0.597,
+    "acc_fake": 0.86
+   },
+   {
+    "edit": "pitch:4",
+    "accuracy": 0.748,
+    "eer": 0.242,
+    "acc_real": 0.717,
+    "acc_fake": 0.78
+   },
+   {
+    "edit": "pitch:6",
+    "accuracy": 0.74,
+    "eer": 0.263,
+    "acc_real": 0.783,
+    "acc_fake": 0.697
+   },
+   {
+    "edit": "tempo:0.8",
+    "accuracy": 0.678,
+    "eer": 0.232,
+    "acc_real": 0.45,
+    "acc_fake": 0.907
+   },
+   {
+    "edit": "tempo:1.2",
+    "accuracy": 0.727,
+    "eer": 0.213,
+    "acc_real": 0.577,
+    "acc_fake": 0.877
+   },
+   {
+    "edit": "noise:20",
+    "accuracy": 0.603,
+    "eer": 0.258,
+    "acc_real": 0.24,
+    "acc_fake": 0.967
+   },
+   {
+    "edit": "noise:10",
+    "accuracy": 0.653,
+    "eer": 0.295,
+    "acc_real": 0.527,
+    "acc_fake": 0.78
+   },
+   {
+    "edit": "reverb:0.5",
+    "accuracy": 0.542,
+    "eer": 0.27,
+    "acc_real": 0.13,
+    "acc_fake": 0.953
+   },
+   {
+    "edit": "reverb:1.0",
+    "accuracy": 0.532,
+    "eer": 0.333,
+    "acc_real": 0.117,
+    "acc_fake": 0.947
+   }
+  ]
  }
 ];

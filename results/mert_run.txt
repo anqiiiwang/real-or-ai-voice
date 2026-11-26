@@ -1,0 +1,31 @@
+device=mps  model=m-a-p/MERT-v1-95M
+11 singers: CtrSVDD_0052(m4singer), CtrSVDD_0053(m4singer), CtrSVDD_0054(m4singer), CtrSVDD_0055(m4singer), CtrSVDD_0056(m4singer), CtrSVDD_0057(m4singer), CtrSVDD_0110(m4singer), CtrSVDD_0111(m4singer), CtrSVDD_0112(m4singer), CtrSVDD_0113(m4singer), CtrSVDD_0058(opencpop)
+test singers: ['CtrSVDD_0112', 'CtrSVDD_0113']
+train: 2000 clips   test: 600 clips
+
+train features: (2000, 13, 768)  (59s)
+CV accuracy per layer: 0.73 0.77 0.77 0.80 0.80 0.81 0.80 0.82 0.80 0.80 0.77 0.76 0.75
+-> best layer: 7
+
+CV EER on training singers: 0.193   decision threshold: 0.579
+
+        edit     acc     EER  real ok  fake ok
+       clean   0.808   0.160    0.707    0.910
+         A01  fake detected: 1.000
+         A02  fake detected: 0.980
+         A05  fake detected: 1.000
+         A06  fake detected: 0.800
+         A07  fake detected: 0.860
+         A08  fake detected: 0.820
+     pitch:1   0.723   0.227    0.540    0.907
+     pitch:2   0.728   0.220    0.597    0.860
+     pitch:4   0.748   0.242    0.717    0.780
+     pitch:6   0.740   0.263    0.783    0.697
+   tempo:0.8   0.678   0.232    0.450    0.907
+   tempo:1.2   0.727   0.213    0.577    0.877
+    noise:20   0.603   0.258    0.240    0.967
+    noise:10   0.653   0.295    0.527    0.780
+  reverb:0.5   0.542   0.270    0.130    0.953
+  reverb:1.0   0.532   0.333    0.117    0.947
+
+saved results/MERT-v1-95M_results_n1000_s0.csv   total time 298s
