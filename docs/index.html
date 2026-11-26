@@ -128,10 +128,11 @@
   </div>
   <div class="tldr">
     <b>TL;DR</b>
-    Singing-voice deepfake detectors are evaluated on clean audio. We test them on Mandarin singing
-    after everyday edits (pitch shift, tempo change, noise, reverb). In our first experiments, every
-    edit roughly doubles the error rate. Noise and reverb make real singers look fake, and larger
-    pitch shifts let AI-sung clips pass as real.
+    Singing-voice deepfake detectors are evaluated on clean audio. We test three of them on Mandarin singing
+    after everyday edits (pitch shift, tempo change, noise, reverb), with every singer taking a turn as an unseen
+    test singer. Every edit hurts. The detector that is best on clean audio (WavLM) is the most fragile: after a
+    one-semitone pitch shift it calls almost every real singer fake. The music-pretrained MERT holds up best
+    under pitch and tempo changes, but fails the other way, letting AI-sung clips pass as real.
   </div>
 </header>
 
@@ -150,8 +151,11 @@
   catches AI-written lyrics. It has a blind spot: <strong>human-written songs sung by an AI voice</strong>,
   such as AI covers.</p>
   <p>Singing-voice deepfake detection (SVDD) targets exactly this case. Chinese datasets and strong
-  detectors exist [2, 3, 4], but they are evaluated on <strong>clean audio</strong>. Real AI covers are often
-  pitch-shifted, sped up, or mixed with reverb. Does detection survive those edits?</p>
+  detectors exist [2, 3, 4], but they are mostly evaluated on <strong>clean audio</strong>. Hurt &amp; Yang [6]
+  recently tested frozen speech encoders on CtrSVDD under noise, reverberation and lossy coding. They leave
+  music-pretrained encoders and training-time augmentation open. Pitch shift and tempo change, the most
+  common edits in music, have so far been studied only for full-song music detectors [7].
+  Real AI covers are often pitch-shifted, sped up, or mixed with reverb. Does detection survive those edits?</p>
   <div class="card">
     <h3 style="margin-top:0">Research questions</h3>
     <ul class="clean">
@@ -173,8 +177,8 @@
     <div class="stat"><div class="num">14,581</div><div class="lbl">real (bona fide) clips</div></div>
     <div class="stat"><div class="num">91,110</div><div class="lbl">AI-sung clips, 8 generation methods</div></div>
   </div>
-  <p class="muted small">We use a balanced subset for training and testing: 1,000 real + 1,000 AI clips for training,
-  and 300 + 300 for testing. AI clips are spread evenly over the generation methods.</p>
+  <p class="muted small">We use a balanced subset: 100 real + 100 AI clips per singer (2,200 clips in total),
+  with the AI clips spread evenly over the generation methods.</p>
 </section>
 
 <section id="method">
@@ -214,7 +218,7 @@
   </table></div>
   <h3>Making the test fair</h3>
   <ul class="clean">
-    <li><b>Unseen singers:</b> test singers never appear in training. The layer and the decision threshold are chosen by singer-grouped cross-validation on the training singers only.</li>
+    <li><b>Unseen singers, rotated:</b> the 10 M4Singer singers are split into 5 folds of 2. Each fold is tested once while the other 9 singers train the classifier, and we report mean ± std over the 5 folds. The layer and the decision threshold are chosen on the training singers only.</li>
     <li><b>Paired comparison:</b> the same test clips are used for every edit, so a drop can only come from the edit.</li>
     <li><b>Different edits in training and testing</b> for the augmentation experiment (e.g. train with ±1 semitone, test with +2 to +6).</li>
   </ul>
@@ -232,10 +236,11 @@
     <div class="chart-head">
       <div>
         <div class="chart-title">EER on unseen singers, clean vs. edited</div>
-        <div class="small muted">Lower is better · dashed line = chance (0.5)</div>
+        <div class="small muted">Mean over 5 singer folds, whiskers = ±1 std · lower is better · dashed line = chance (0.5)</div>
       </div>
       <div class="legend" id="legend"></div>
     </div>
+    <div class="tabs toggle" id="headtabs" role="group" aria-label="Detection head" style="margin-bottom:12px"></div>
     <div id="chart"></div>
   </div>
 
@@ -245,12 +250,14 @@
 
   <h3>Findings so far</h3>
   <ul class="clean" id="findings">
-    <li><b>Every edit hurts.</b> With wav2vec2-base, the EER rises from 0.18 on clean audio to 0.35–0.44 after editing. Strong reverb and noise come close to chance.</li>
-    <li><b>Noise, reverb and tempo cause false alarms.</b> Real singers are increasingly labelled as AI (real accuracy drops from 0.58 to almost 0 with noise).</li>
-    <li><b>Pitch shift hides fakes.</b> The larger the shift, the more AI clips pass as real (AI accuracy 0.93 → 0.81 from +1 to +6 semitones).</li>
-    <li><b>Lower layers work best.</b> The best layer is an early one (layer 3 of 12), consistent with synthesis artefacts living in low-level acoustic detail.</li>
+    <li><b>Every edit hurts every model.</b> Across all three front ends and all ten edits, the EER rises from 0.07–0.13 on clean audio to 0.20–0.42.</li>
+    <li><b>Best on clean ≠ most robust.</b> WavLM-Large has the lowest clean EER (0.067 ± 0.023). After any pitch shift, tempo change or reverb, it labels about 98–99% of real clips as AI, consistently across the five folds (std ≤ 0.02).</li>
+    <li><b>The failure direction depends on the front end.</b> WavLM fails with false alarms on real singers. MERT fails the other way: under pitch shift, tempo change and reverb, real clips stay correct but AI clips pass as real (AI correct falls from 0.87 to 0.23 at +6 semitones). Noise causes false alarms for all three models.</li>
+    <li><b>No model wins everywhere.</b> MERT is most robust to pitch and tempo changes (EER 0.22–0.29 vs. 0.28–0.39), WavLM to noise (0.20 and 0.29), and on reverb no model is clearly better.</li>
+    <li><b>The differences are larger than the singer-to-singer variation.</b> For example, at +1 semitone, the EER is 0.343 ± 0.022 for WavLM and 0.237 ± 0.016 for MERT. On clean audio, wav2vec2 and MERT cannot be told apart.</li>
+    <li><b>Shallow-to-middle layers work best.</b> The layers chosen are 1–2 of 12 (wav2vec2), 4–5 of 12 (MERT) and 6–10 of 24 (WavLM), in line with [6], where middle layers beat the last layer.</li>
   </ul>
-  <p class="note">Preliminary: one front end, two test singers, one seed. Results for WavLM-Large and MERT, rotated test singers, and augmentation will be added.</p>
+  <p class="note">Next: a stronger, attention-based detection head (does it fix the collapse?) and training with augmentation.</p>
 </section>
 
 <section id="demo">
@@ -279,6 +286,8 @@
     <li>Y. Zang et al., "CtrSVDD: A Benchmark Dataset and Baseline Analysis for Controlled Singing Voice Deepfake Detection," <i>Interspeech</i>, 2024.</li>
     <li>Y. Zhang et al., "SVDD 2024: The Inaugural Singing Voice Deepfake Detection Challenge," <i>IEEE SLT</i>, 2024.</li>
     <li>X. Wang and J. Yamagishi, "Investigating Self-Supervised Front Ends for Speech Spoofing Countermeasures," <i>Odyssey</i>, 2022.</li>
+    <li>B. Hurt and Y. Yang, "Which Layer to Trust? Layer Selection in Frozen Speech Encoders for Singing-Voice Deepfake Detection under Signal Corruption," arXiv:2611.29871, 2026.</li>
+    <li>D. Afchar, G. Meseguer-Brocal and R. Hennequin, "Detecting Music Deepfakes is Easy but Actually Hard," arXiv:2405.04181, 2024.</li>
   </ol>
 </section>
 
@@ -287,9 +296,10 @@
   <p>Download <code>dev.txt</code>, <code>dev_set.zip</code>, <code>train.txt</code> and <code>train_set.zip</code> from
   <a href="https://zenodo.org/records/10467648">Zenodo</a> into <code>data/</code>, then:</p>
 <pre><code>pip install -r requirements.txt
-python baseline.py                                   # wav2vec2-base
-python baseline.py --model microsoft/wavlm-large
-python baseline.py --model m-a-p/MERT-v1-95M
+python rotate.py                                     # wav2vec2-base, 5 singer folds
+python rotate.py --model microsoft/wavlm-large
+python rotate.py --model m-a-p/MERT-v1-95M
+python attn_head.py --model microsoft/wavlm-large    # attentive head (after rotate.py)
 python make_site_data.py                             # update this page</code></pre>
 </section>
 
@@ -306,7 +316,10 @@ python make_site_data.py                             # update this page</code></
 <script src="data/demo.js" onerror="void 0"></script>
 <script>
 (function () {
-  const R = window.RESULTS || [];
+  const ALL = window.RESULTS || {};
+  const HEADS = [["mean", "Mean pooling + logistic regression"], ["attn", "Attentive pooling head"]];
+  const avail = HEADS.filter(([k]) => (ALL[k] || []).length);
+  let head = avail.length ? avail[0][0] : null;
   const css = getComputedStyle(document.documentElement);
   const colorOf = i => css.getPropertyValue(["--s1", "--s2", "--s3"][i]).trim();
   const tip = document.getElementById("tip");
@@ -315,25 +328,40 @@ python make_site_data.py                             # update this page</code></
     return { pitch: `Pitch +${v} st`, tempo: `Tempo ×${v}`, noise: `Noise ${v} dB`, reverb: `Reverb ${v} s` }[k] || e;
   })();
   const fmt = x => x.toFixed(3);
+  const pm = (r, k) => r[k + "_std"] !== undefined ? `${fmt(r[k])} ± ${fmt(r[k + "_std"])}` : fmt(r[k]);
 
-  if (!R.length) {
+  if (!head) {
     document.getElementById("chart").innerHTML = '<p class="note">No results yet. Run make_site_data.py.</p>';
     return;
   }
+  let tableModel = 0;
 
-  // ---------- legend (only for >= 2 series)
-  const legend = document.getElementById("legend");
-  if (R.length > 1) legend.innerHTML = R.map((m, i) => `<span><i style="background:${colorOf(i)}"></i>${m.model}</span>`).join("");
+  // ---------- head toggle (only if both heads have results)
+  const ht = document.getElementById("headtabs");
+  if (avail.length > 1) {
+    ht.innerHTML = avail.map(([k, n]) => `<button type="button" data-h="${k}">${n}</button>`).join("");
+    ht.querySelectorAll("button").forEach(b => b.onclick = () => { head = b.dataset.h; render(); });
+  } else ht.style.display = "none";
 
-  // ---------- grouped horizontal bar chart of EER
-  function drawChart() {
+  function render() {
+    const R = ALL[head];
+    ht.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.h === head));
+    const legend = document.getElementById("legend");
+    legend.innerHTML = R.length > 1 ? R.map((m, i) => `<span><i style="background:${colorOf(i)}"></i>${m.model}</span>`).join("") : "";
+    drawChart(R);
+    drawTabs(R);
+    drawTable(R, Math.min(tableModel, R.length - 1));
+  }
+
+  // ---------- grouped horizontal bar chart of EER with ±std whiskers
+  function drawChart(R) {
     const edits = R[0].rows.map(r => r.edit);
     const n = R.length;
     const bh = n === 1 ? 14 : 10, gap = 2, groupPad = 12;
     const groupH = n * bh + (n - 1) * gap + groupPad;
     const W = 780, L = 112, Rm = 44, T = 8, B = 30;
     const H = T + edits.length * groupH + B;
-    const x = v => L + (v / 0.5) * (W - L - Rm);
+    const x = v => L + (Math.min(v, 0.5) / 0.5) * (W - L - Rm);
     let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Equal error rate per edit and model">`;
     for (const t of [0, 0.1, 0.2, 0.3, 0.4, 0.5]) {
       s += `<line x1="${x(t)}" x2="${x(t)}" y1="${T}" y2="${H - B}" stroke="var(--grid)" stroke-width="1" ${t === 0.5 ? 'stroke-dasharray="4 4" stroke="var(--axis)"' : ""}/>`;
@@ -347,9 +375,13 @@ python make_site_data.py                             # update this page</code></
       R.forEach((m, i) => {
         const r = m.rows.find(q => q.edit === e); if (!r) return;
         const y = y0 + i * (bh + gap), w = Math.max(1, x(r.eer) - L), rad = Math.min(4, bh / 2);
-        // bar anchored at the baseline, rounded data-end only
         s += `<path d="M${L},${y} h${w - rad} a${rad},${rad} 0 0 1 ${rad},${rad} v${bh - 2 * rad} a${rad},${rad} 0 0 1 -${rad},${rad} h-${w - rad} z" fill="${colorOf(i)}"/>`;
-        if (n <= 1 || e === "clean") s += `<text x="${x(r.eer) + 5}" y="${y + bh / 2 + 4}">${fmt(r.eer)}</text>`;
+        if (r.eer_std) {
+          const a = x(r.eer - r.eer_std), b = x(r.eer + r.eer_std), cy = y + bh / 2;
+          s += `<line x1="${a}" x2="${b}" y1="${cy}" y2="${cy}" stroke="var(--ink)" stroke-width="1.2" opacity=".7"/>`;
+          s += `<line x1="${b}" x2="${b}" y1="${cy - 3}" y2="${cy + 3}" stroke="var(--ink)" stroke-width="1.2" opacity=".7"/>`;
+        }
+        if (e === "clean") s += `<text x="${x(r.eer + (r.eer_std || 0)) + 5}" y="${y + bh / 2 + 4}">${fmt(r.eer)}</text>`;
         s += `<rect x="${L}" y="${y - gap}" width="${W - L - Rm}" height="${bh + 2 * gap}" fill="transparent" data-m="${i}" data-e="${e}" class="hit"/>`;
       });
     });
@@ -361,8 +393,8 @@ python make_site_data.py                             # update this page</code></
       h.addEventListener("mousemove", ev => {
         const m = R[+h.dataset.m], r = m.rows.find(q => q.edit === h.dataset.e);
         tip.innerHTML = `<b>${label(r.edit)}</b><br><span class="sw" style="background:${colorOf(+h.dataset.m)}"></span>${m.model}<br>
-          EER ${fmt(r.eer)} · accuracy ${fmt(r.accuracy)}<br>real correct ${fmt(r.acc_real)} · AI correct ${fmt(r.acc_fake)}`;
-        tip.style.left = Math.min(ev.clientX + 14, innerWidth - 240) + "px";
+          EER ${pm(r, "eer")}<br>real correct ${pm(r, "acc_real")}<br>AI correct ${pm(r, "acc_fake")}`;
+        tip.style.left = Math.min(ev.clientX + 14, innerWidth - 260) + "px";
         tip.style.top = ev.clientY + 14 + "px";
         tip.style.opacity = 1;
       });
@@ -371,21 +403,25 @@ python make_site_data.py                             # update this page</code></
   }
 
   // ---------- table with model tabs
-  function drawTable(mi) {
+  function drawTabs(R) {
+    const tabs = document.getElementById("tabs");
+    if (R.length > 1) {
+      tabs.style.display = "";
+      tabs.innerHTML = R.map(m => `<button type="button">${m.model}</button>`).join("");
+      tabs.querySelectorAll("button").forEach((b, i) => b.onclick = () => drawTable(R, i));
+    } else tabs.style.display = "none";
+  }
+  function drawTable(R, mi) {
+    tableModel = mi;
     const m = R[mi];
     document.getElementById("table").innerHTML =
       `<thead><tr><th>Edit</th><th>EER</th><th>Accuracy</th><th>Real correct</th><th>AI correct</th></tr></thead><tbody>` +
-      m.rows.map(r => `<tr class="${r.edit === "clean" ? "clean-row" : ""}"><td>${label(r.edit)}</td><td>${fmt(r.eer)}</td><td>${fmt(r.accuracy)}</td><td>${fmt(r.acc_real)}</td><td>${fmt(r.acc_fake)}</td></tr>`).join("") +
+      m.rows.map(r => `<tr class="${r.edit === "clean" ? "clean-row" : ""}"><td>${label(r.edit)}</td><td>${pm(r, "eer")}</td><td>${pm(r, "accuracy")}</td><td>${pm(r, "acc_real")}</td><td>${pm(r, "acc_fake")}</td></tr>`).join("") +
       "</tbody>";
     document.querySelectorAll("#tabs button").forEach((b, i) => b.setAttribute("aria-pressed", i === mi));
   }
-  const tabs = document.getElementById("tabs");
-  if (R.length > 1) {
-    tabs.innerHTML = R.map((m, i) => `<button type="button">${m.model}</button>`).join("");
-    tabs.querySelectorAll("button").forEach((b, i) => b.onclick = () => drawTable(i));
-  } else tabs.style.display = "none";
 
-  drawChart(); drawTable(0);
+  render();
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => location.reload());
 
   // ---------- optional audio demo (docs/data/demo.js sets window.DEMO = [{label, file, score}])
