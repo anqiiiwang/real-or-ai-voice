@@ -1,0 +1,28 @@
+device=mps  model=microsoft/wavlm-large
+pool: 2200 clips from 11 singers
+  fold 1: test singers ['CtrSVDD_0055', 'CtrSVDD_0113']
+  fold 2: test singers ['CtrSVDD_0110', 'CtrSVDD_0111']
+  fold 3: test singers ['CtrSVDD_0057', 'CtrSVDD_0112']
+  fold 4: test singers ['CtrSVDD_0054', 'CtrSVDD_0056']
+  fold 5: test singers ['CtrSVDD_0052', 'CtrSVDD_0053']
+extracting 2200 clips x 5 conditions (cached after the first run)
+
+  features       clean: (2200, 25, 1024)  (0s)
+  features     pitch:2: (2200, 25, 1024)  (1s)
+  features   pitchrt:2: (2200, 25, 1024)  (106s)
+  features   tempo:1.2: (2200, 25, 1024)  (106s)
+  features temport:1.2: (2200, 25, 1024)  (208s)
+fold 1: layer  7  clean EER 0.082
+fold 2: layer  6  clean EER 0.038
+fold 3: layer  7  clean EER 0.065
+fold 4: layer 10  clean EER 0.102
+fold 5: layer  7  clean EER 0.048
+
+        edit   EER (mean ± std)           acc       real ok       fake ok
+       clean     0.067 ± 0.023  0.925 ± 0.025  0.906 ± 0.063  0.944 ± 0.026
+     pitch:2     0.350 ± 0.029  0.502 ± 0.004  0.010 ± 0.007  0.995 ± 0.008
+   pitchrt:2     0.408 ± 0.022  0.501 ± 0.003  0.007 ± 0.005  0.996 ± 0.006
+   tempo:1.2     0.345 ± 0.022  0.501 ± 0.004  0.005 ± 0.008  0.998 ± 0.002
+ temport:1.2     0.425 ± 0.023  0.502 ± 0.002  0.007 ± 0.007  0.997 ± 0.004
+
+saved results/wavlm-large_rotate_roundtrip_summary.csv and per-fold results   total time 218s

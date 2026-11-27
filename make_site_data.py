@@ -6,6 +6,8 @@ Collect result CSVs into docs/data/results.js, which the website reads. Run afte
 Uses the rotated-test-singer results (mean +- std over 5 folds):
     results/<model>_rotate_summary.csv   -> head "mean"  (mean pooling + logistic regression)
     results/<model>_attn_summary.csv     -> head "attn"  (attentive pooling head)
+    results/<model>_aug_summary.csv      -> augmentation table
+    results/<model>_rotate_roundtrip_summary.csv -> round-trip control table
 """
 import csv
 import json
@@ -36,6 +38,30 @@ for head, suffix in HEADS.items():
                 "acc_fake": round(float(r["acc_fake_mean"]), 3), "acc_fake_std": round(float(r["acc_fake_std"]), 3),
             })
         out[head].append({"model": label, "rows": rows})
+
+def read_summary(f):
+    return {r["edit"]: (round(float(r["eer_mean"]), 3), round(float(r["eer_std"]), 3))
+            for r in csv.DictReader(open(f))}
+
+
+# augmentation: results/<model>_aug_summary.csv  (settings none / all / lofo)
+out["aug"] = []
+for prefix, label in MODELS.items():
+    f = Path("results") / f"{prefix}_aug_summary.csv"
+    if not f.exists():
+        continue
+    rows = {}
+    for r in csv.DictReader(open(f)):
+        rows.setdefault(r["edit"], {"edit": r["edit"]})[r["setting"]] = [
+            round(float(r["eer_mean"]), 3), round(float(r["eer_std"]), 3)]
+    out["aug"].append({"model": label, "rows": list(rows.values())})
+
+# round-trip control: results/<model>_rotate_roundtrip_summary.csv
+out["roundtrip"] = []
+for prefix, label in MODELS.items():
+    f = Path("results") / f"{prefix}_rotate_roundtrip_summary.csv"
+    if f.exists():
+        out["roundtrip"].append({"model": label, "eer": read_summary(f)})
 
 dest = Path("docs/data/results.js")
 dest.parent.mkdir(parents=True, exist_ok=True)

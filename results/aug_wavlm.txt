@@ -1,0 +1,55 @@
+device=mps  model=microsoft/wavlm-large
+train edits: ['pitch:-1', 'pitch:-3', 'tempo:0.9', 'tempo:1.1', 'noise:30', 'reverb:0.3']
+test edits : ['clean', 'pitch:1', 'pitch:2', 'pitch:4', 'pitch:6', 'tempo:0.8', 'tempo:1.2', 'noise:20', 'noise:10', 'reverb:0.5', 'reverb:1.0']
+
+  features       clean: (2200, 25, 1024)  (0s)
+  features     pitch:1: (2200, 25, 1024)  (1s)
+  features     pitch:2: (2200, 25, 1024)  (1s)
+  features     pitch:4: (2200, 25, 1024)  (2s)
+  features     pitch:6: (2200, 25, 1024)  (2s)
+  features   tempo:0.8: (2200, 25, 1024)  (2s)
+  features   tempo:1.2: (2200, 25, 1024)  (3s)
+  features    noise:20: (2200, 25, 1024)  (3s)
+  features    noise:10: (2200, 25, 1024)  (4s)
+  features  reverb:0.5: (2200, 25, 1024)  (4s)
+  features  reverb:1.0: (2200, 25, 1024)  (4s)
+  features    pitch:-1: (2200, 25, 1024)  (94s)
+  features    pitch:-3: (2200, 25, 1024)  (182s)
+  features   tempo:0.9: (2200, 25, 1024)  (271s)
+  features   tempo:1.1: (2200, 25, 1024)  (358s)
+  features    noise:30: (2200, 25, 1024)  (433s)
+  features  reverb:0.3: (2200, 25, 1024)  (510s)
+fold 1: layer  7  clean EER none 0.082  all 0.130   (517s)
+fold 2: layer  6  clean EER none 0.038  all 0.055   (523s)
+fold 3: layer  7  clean EER none 0.065  all 0.112   (529s)
+fold 4: layer 10  clean EER none 0.102  all 0.080   (535s)
+fold 5: layer  7  clean EER none 0.048  all 0.053   (542s)
+
+EER (mean ± std over folds)
+        edit       clean only        + all aug   + aug, family unseen
+       clean    0.067 ± 0.023    0.086 ± 0.031                       
+     pitch:1    0.343 ± 0.022    0.168 ± 0.022          0.177 ± 0.030
+     pitch:2    0.350 ± 0.029    0.191 ± 0.037          0.197 ± 0.039
+     pitch:4    0.353 ± 0.042    0.235 ± 0.040          0.241 ± 0.052
+     pitch:6    0.386 ± 0.038    0.280 ± 0.031          0.287 ± 0.044
+   tempo:0.8    0.348 ± 0.020    0.180 ± 0.025          0.179 ± 0.035
+   tempo:1.2    0.345 ± 0.022    0.160 ± 0.020          0.162 ± 0.022
+    noise:20    0.200 ± 0.044    0.199 ± 0.044          0.221 ± 0.046
+    noise:10    0.287 ± 0.044    0.282 ± 0.033          0.304 ± 0.035
+  reverb:0.5    0.312 ± 0.025    0.194 ± 0.028          0.189 ± 0.027
+  reverb:1.0    0.381 ± 0.053    0.240 ± 0.025          0.247 ± 0.011
+
+real ok / fake ok  (clean only -> + all aug)
+       clean  real 0.906 -> 0.888   fake 0.944 -> 0.926
+     pitch:1  real 0.010 -> 0.789   fake 0.997 -> 0.830
+     pitch:2  real 0.010 -> 0.798   fake 0.995 -> 0.803
+     pitch:4  real 0.021 -> 0.853   fake 0.995 -> 0.685
+     pitch:6  real 0.020 -> 0.896   fake 0.993 -> 0.561
+   tempo:0.8  real 0.010 -> 0.787   fake 0.993 -> 0.817
+   tempo:1.2  real 0.005 -> 0.819   fake 0.998 -> 0.843
+    noise:20  real 0.382 -> 0.756   fake 0.971 -> 0.820
+    noise:10  real 0.186 -> 0.699   fake 0.960 -> 0.666
+  reverb:0.5  real 0.021 -> 0.717   fake 0.993 -> 0.859
+  reverb:1.0  real 0.007 -> 0.586   fake 0.995 -> 0.835
+
+saved results/wavlm-large_aug_summary.csv   total time 542s

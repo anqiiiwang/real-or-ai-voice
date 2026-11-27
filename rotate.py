@@ -14,6 +14,10 @@ Run (from the project folder):
     python rotate.py                                  # wav2vec2-base
     python rotate.py --model microsoft/wavlm-large
     python rotate.py --model m-a-p/MERT-v1-95M
+
+Round-trip control (edit and undo; saved separately so the main results are kept):
+    python rotate.py --model microsoft/wavlm-large --suffix _roundtrip \
+        --edits clean,pitch:2,pitchrt:2,tempo:1.2,temport:1.2
 """
 import argparse
 import random
@@ -59,6 +63,7 @@ def add_common_args(ap):
     ap.add_argument("--edits", default=B.DEFAULT_EDITS)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default="results")
+    ap.add_argument("--suffix", default="", help="added to the output file names, e.g. _roundtrip")
 
 
 def main():
@@ -128,9 +133,10 @@ def main():
         summary.append(f"{e},{v['eer'].mean():.4f},{v['eer'].std():.4f},{v['acc'].mean():.4f},{v['acc'].std():.4f},"
                        f"{v['real'].mean():.4f},{v['real'].std():.4f},{v['fake'].mean():.4f},{v['fake'].std():.4f}")
 
-    (out / f"{tag}_rotate_folds.csv").write_text("\n".join(lines) + "\n")
-    (out / f"{tag}_rotate_summary.csv").write_text("\n".join(summary) + "\n")
-    print(f"\nsaved {out / (tag + '_rotate_summary.csv')} and per-fold results   total time {time.time() - t0:.0f}s")
+    name = f"{tag}_rotate{args.suffix}"
+    (out / f"{name}_folds.csv").write_text("\n".join(lines) + "\n")
+    (out / f"{name}_summary.csv").write_text("\n".join(summary) + "\n")
+    print(f"\nsaved {out / (name + '_summary.csv')} and per-fold results   total time {time.time() - t0:.0f}s")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,55 @@
+device=mps  model=m-a-p/MERT-v1-95M
+train edits: ['pitch:-1', 'pitch:-3', 'tempo:0.9', 'tempo:1.1', 'noise:30', 'reverb:0.3']
+test edits : ['clean', 'pitch:1', 'pitch:2', 'pitch:4', 'pitch:6', 'tempo:0.8', 'tempo:1.2', 'noise:20', 'noise:10', 'reverb:0.5', 'reverb:1.0']
+
+  features       clean: (2200, 13, 768)  (0s)
+  features     pitch:1: (2200, 13, 768)  (0s)
+  features     pitch:2: (2200, 13, 768)  (0s)
+  features     pitch:4: (2200, 13, 768)  (1s)
+  features     pitch:6: (2200, 13, 768)  (1s)
+  features   tempo:0.8: (2200, 13, 768)  (1s)
+  features   tempo:1.2: (2200, 13, 768)  (1s)
+  features    noise:20: (2200, 13, 768)  (1s)
+  features    noise:10: (2200, 13, 768)  (1s)
+  features  reverb:0.5: (2200, 13, 768)  (2s)
+  features  reverb:1.0: (2200, 13, 768)  (2s)
+  features    pitch:-1: (2200, 13, 768)  (88s)
+  features    pitch:-3: (2200, 13, 768)  (173s)
+  features   tempo:0.9: (2200, 13, 768)  (260s)
+  features   tempo:1.1: (2200, 13, 768)  (344s)
+  features    noise:30: (2200, 13, 768)  (407s)
+  features  reverb:0.3: (2200, 13, 768)  (474s)
+fold 1: layer  4  clean EER none 0.165  all 0.160   (477s)
+fold 2: layer  5  clean EER none 0.095  all 0.120   (481s)
+fold 3: layer  5  clean EER none 0.097  all 0.158   (484s)
+fold 4: layer  4  clean EER none 0.128  all 0.163   (488s)
+fold 5: layer  5  clean EER none 0.095  all 0.112   (491s)
+
+EER (mean ± std over folds)
+        edit       clean only        + all aug   + aug, family unseen
+       clean    0.116 ± 0.027    0.143 ± 0.022                       
+     pitch:1    0.237 ± 0.016    0.159 ± 0.022          0.168 ± 0.021
+     pitch:2    0.266 ± 0.012    0.177 ± 0.016          0.208 ± 0.019
+     pitch:4    0.286 ± 0.013    0.184 ± 0.024          0.212 ± 0.028
+     pitch:6    0.280 ± 0.018    0.218 ± 0.026          0.228 ± 0.031
+   tempo:0.8    0.231 ± 0.013    0.149 ± 0.031          0.167 ± 0.032
+   tempo:1.2    0.218 ± 0.022    0.156 ± 0.021          0.160 ± 0.019
+    noise:20    0.302 ± 0.038    0.249 ± 0.049          0.303 ± 0.060
+    noise:10    0.360 ± 0.041    0.316 ± 0.048          0.371 ± 0.049
+  reverb:0.5    0.291 ± 0.019    0.212 ± 0.030          0.210 ± 0.025
+  reverb:1.0    0.331 ± 0.024    0.264 ± 0.018          0.259 ± 0.026
+
+real ok / fake ok  (clean only -> + all aug)
+       clean  real 0.863 -> 0.817   fake 0.870 -> 0.872
+     pitch:1  real 0.858 -> 0.851   fake 0.659 -> 0.788
+     pitch:2  real 0.906 -> 0.923   fake 0.518 -> 0.677
+     pitch:4  real 0.978 -> 0.962   fake 0.305 -> 0.541
+     pitch:6  real 0.992 -> 0.978   fake 0.230 -> 0.418
+   tempo:0.8  real 0.860 -> 0.800   fake 0.617 -> 0.853
+   tempo:1.2  real 0.873 -> 0.861   fake 0.635 -> 0.798
+    noise:20  real 0.360 -> 0.605   fake 0.907 -> 0.839
+    noise:10  real 0.525 -> 0.695   fake 0.724 -> 0.655
+  reverb:0.5  real 0.852 -> 0.653   fake 0.501 -> 0.848
+  reverb:1.0  real 0.845 -> 0.430   fake 0.429 -> 0.897
+
+saved results/MERT-v1-95M_aug_summary.csv   total time 491s

@@ -94,7 +94,8 @@ def fix_length(y, sr, seconds):
 
 # ---------------------------------------------------------------- edits
 def apply_edit(y, sr, edit, rng):
-    """edit strings: clean | pitch:<semitones> | tempo:<rate> | noise:<snr_db> | reverb:<rt60_s>"""
+    """edit strings: clean | pitch:<semitones> | tempo:<rate> | noise:<snr_db> | reverb:<rt60_s>
+    | pitchrt:<semitones> | temport:<rate>  (round trips: edit and undo it)"""
     if edit == "clean":
         return y
     kind, val = edit.split(":")
@@ -103,6 +104,11 @@ def apply_edit(y, sr, edit, rng):
         return librosa.effects.pitch_shift(y, sr=sr, n_steps=val)
     if kind == "tempo":
         return librosa.effects.time_stretch(y, rate=val)
+    if kind == "pitchrt":   # round trip: up by val semitones, then back down -> same pitch, processing traces remain
+        up = librosa.effects.pitch_shift(y, sr=sr, n_steps=val)
+        return librosa.effects.pitch_shift(up, sr=sr, n_steps=-val)
+    if kind == "temport":   # round trip: stretch by val, then back -> same tempo, processing traces remain
+        return librosa.effects.time_stretch(librosa.effects.time_stretch(y, rate=val), rate=1 / val)
     if kind == "noise":
         p_sig = np.mean(y ** 2) + 1e-12
         noise = rng.standard_normal(len(y)) * np.sqrt(p_sig / 10 ** (val / 10))

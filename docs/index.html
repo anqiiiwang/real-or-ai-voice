@@ -104,9 +104,13 @@
   .tabs { display: flex; gap: 6px; margin: 4px 0 10px; flex-wrap: wrap; }
 
   /* demo */
-  .demo-row { display: grid; grid-template-columns: 90px 1fr 120px; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--grid); }
+  .demo-row { display: grid; grid-template-columns: 120px minmax(160px, 1fr) 150px 150px; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--grid); font-size: 15px; }
+  .demo-head { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-2); padding-bottom: 4px; }
+  .verdict { font-weight: 600; }
+  .verdict.wrong::after { content: " ✗"; color: var(--ink-2); font-weight: 400; }
+  @media (max-width: 640px) { .demo-row { grid-template-columns: 1fr 1fr; } .demo-row audio { grid-column: 1 / -1; } }
   .demo-row audio { width: 100%; height: 34px; }
-  .score { font-variant-numeric: tabular-nums; text-align: right; }
+  .score { font-variant-numeric: tabular-nums; }
   .meter { height: 6px; border-radius: 3px; background: var(--grid); margin-top: 4px; overflow: hidden; }
   .meter i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
 
@@ -129,10 +133,11 @@
   <div class="tldr">
     <b>TL;DR</b>
     Singing-voice deepfake detectors are evaluated on clean audio. We test three of them on Mandarin singing
-    after everyday edits (pitch shift, tempo change, noise, reverb), with every singer taking a turn as an unseen
-    test singer. Every edit hurts. The detector that is best on clean audio (WavLM) is the most fragile: after a
-    one-semitone pitch shift it calls almost every real singer fake. The music-pretrained MERT holds up best
-    under pitch and tempo changes, but fails the other way, letting AI-sung clips pass as real.
+    after everyday edits (pitch shift, tempo change, noise, reverb). Every edit hurts, and the detector that is
+    best on clean audio (WavLM) collapses: after a one-semitone pitch shift it calls almost every real singer
+    fake. A control experiment shows why: the detectors react to processing traces, not to the change itself.
+    A stronger classifier does not help, but training with a few edited clips does, even for edit types never
+    seen in training.
   </div>
 </header>
 
@@ -248,22 +253,38 @@
   <div class="tabs toggle" id="tabs" role="group" aria-label="Model"></div>
   <div class="table-wrap"><table id="table"></table></div>
 
-  <h3>Findings so far</h3>
+  <h3>Control: edit, then undo it</h3>
+  <p>To separate the musical change from the processing, we shift the pitch up and back down again (or speed up
+  and slow down again). The result has the original pitch and tempo, but carries the processing traces twice.</p>
+  <div class="table-wrap"><table id="rt-table"></table></div>
+  <p class="small muted">EER, mean ± std over 5 singer folds. Undoing the edit does not help: the round trip is as harmful as the edit itself, or more.</p>
+
+  <h3>Training with edits (augmentation)</h3>
+  <p>We add the training singers' clips again with edits that are <em>never used in testing</em>
+  (pitch −1 and −3 st, tempo ×0.9 and ×1.1, noise 30 dB, reverb 0.3 s). The last column trains without any edit
+  of the tested kind, e.g. for pitch shift only tempo, noise and reverb edits are added.</p>
+  <div class="tabs toggle" id="aug-tabs" role="group" aria-label="Model"></div>
+  <div class="table-wrap"><table id="aug-table"></table></div>
+
+  <h3>Findings</h3>
   <ul class="clean" id="findings">
     <li><b>Every edit hurts every model.</b> Across all three front ends and all ten edits, the EER rises from 0.07–0.13 on clean audio to 0.20–0.42.</li>
-    <li><b>Best on clean ≠ most robust.</b> WavLM-Large has the lowest clean EER (0.067 ± 0.023). After any pitch shift, tempo change or reverb, it labels about 98–99% of real clips as AI, consistently across the five folds (std ≤ 0.02).</li>
-    <li><b>The failure direction depends on the front end.</b> WavLM fails with false alarms on real singers. MERT fails the other way: under pitch shift, tempo change and reverb, real clips stay correct but AI clips pass as real (AI correct falls from 0.87 to 0.23 at +6 semitones). Noise causes false alarms for all three models.</li>
-    <li><b>No model wins everywhere.</b> MERT is most robust to pitch and tempo changes (EER 0.22–0.29 vs. 0.28–0.39), WavLM to noise (0.20 and 0.29), and on reverb no model is clearly better.</li>
-    <li><b>The differences are larger than the singer-to-singer variation.</b> For example, at +1 semitone, the EER is 0.343 ± 0.022 for WavLM and 0.237 ± 0.016 for MERT. On clean audio, wav2vec2 and MERT cannot be told apart.</li>
-    <li><b>A stronger head does not fix it.</b> With an attentive pooling head (toggle above the chart), the clean EER stays the same (WavLM 0.070, MERT 0.122), and WavLM still labels over 99% of real clips as AI after pitch shift, tempo change or reverb. For MERT, the head lowers the EER under pitch, tempo and reverb by 0.03–0.07, but it stays well above the clean level. The collapse comes from the pretrained features, not from the simple classifier.</li>
+    <li><b>Best on clean ≠ most robust.</b> WavLM-Large has the lowest clean EER (0.067 ± 0.023). Trained on clean audio, after any pitch shift, tempo change or reverb it labels about 98–99% of real clips as AI, consistently across the five folds (std ≤ 0.02).</li>
+    <li><b>The failure direction depends on the front end.</b> WavLM fails with false alarms on real singers. MERT fails the other way: under pitch shift, tempo change and reverb, AI clips pass as real (AI correct falls from 0.87 to 0.23 at +6 semitones). Noise causes false alarms for all three models.</li>
+    <li><b>The detectors react to processing traces, not to the change.</b> Shifting the pitch up and back down leaves the pitch unchanged, yet hurts as much or more (WavLM: EER 0.350 for +2 st, 0.408 for +2 st and back; tempo ×1.2: 0.345, and back: 0.425).</li>
+    <li><b>A stronger classifier does not fix it; better training data does.</b> An attentive pooling head trained on clean audio changes almost nothing (WavLM still labels over 99% of edited real clips as AI). Training the simple classifier with a few edited clips roughly halves WavLM's EER under small pitch shifts and tempo changes (+1 st: 0.343 → 0.168, ×1.2: 0.345 → 0.160), and brings real-clip accuracy from 1% back to 79%. The cost on clean audio is small (0.067 → 0.086).</li>
+    <li><b>Augmentation transfers between edit types, except noise.</b> Without any pitch edit in training, WavLM's EER at +1 st still drops to 0.177. Pitch, tempo and reverb edits help each other; noise is not helped by the other edit types.</li>
+    <li><b>After augmentation, WavLM and MERT are close.</b> WavLM is best on clean audio, noise and reverb, and MERT on pitch and tempo changes.</li>
     <li><b>Shallow-to-middle layers work best.</b> The layers chosen are 1–2 of 12 (wav2vec2), 4–5 of 12 (MERT) and 6–10 of 24 (WavLM), in line with [6], where middle layers beat the last layer.</li>
   </ul>
-  <p class="note">Next: training with augmentation (edits in training that differ from the test edits).</p>
+  
 </section>
 
 <section id="demo">
-  <h2>Listen: does pitch shift fool the detector?</h2>
-  <p>The same AI-sung clip, shifted up step by step. The bar shows the detector's "AI" score.</p>
+  <h2>Listen: does editing fool the detector?</h2>
+  <p>One real and one AI-sung clip from singers the detectors never saw in training, played back with different
+  edits. Each version is scored by two detectors on the same front end: one trained on clean audio only, and one
+  trained with a few edited clips (none of the edits below). A score above the threshold means "AI".</p>
   <div class="card" id="demo-box">
     <p class="note" style="margin:0">Audio examples will be added here.</p>
   </div>
@@ -273,7 +294,8 @@
   <h2>Limitations</h2>
   <ul class="clean">
     <li>The detector is deliberately simple (frozen front end + linear classifier), not a state-of-the-art system.</li>
-    <li>Edits are simulated in code (librosa pitch shift and time stretch, synthetic reverb), so they approximate real production tools.</li>
+    <li>Edits are simulated in code (librosa's phase-vocoder pitch shift and time stretch, synthetic reverb). Higher-quality production tools may leave fewer processing traces, so the size of the effect may differ.</li>
+    <li>With about 1,600 training clips per fold, the attentive head may be under-trained; the conclusion about heads holds at this data scale.</li>
     <li>CtrSVDD contains isolated vocals. Real songs have accompaniment, which is future work (e.g. WildSVDD [4]).</li>
     <li>Only a few Mandarin singers are available, so results can vary between test singers.</li>
   </ul>
@@ -301,6 +323,9 @@ python rotate.py                                     # wav2vec2-base, 5 singer f
 python rotate.py --model microsoft/wavlm-large
 python rotate.py --model m-a-p/MERT-v1-95M
 python attn_head.py --model microsoft/wavlm-large    # attentive head (after rotate.py)
+python aug.py --model microsoft/wavlm-large          # augmentation (after rotate.py)
+python rotate.py --model microsoft/wavlm-large --suffix _roundtrip \
+    --edits clean,pitch:2,pitchrt:2,tempo:1.2,temport:1.2   # round-trip control
 python make_site_data.py                             # update this page</code></pre>
 </section>
 
@@ -423,14 +448,52 @@ python make_site_data.py                             # update this page</code></
   }
 
   render();
+
+  // ---------- round-trip control table
+  const RT = ALL.roundtrip || [];
+  const rtEl = document.getElementById("rt-table");
+  if (RT.length) {
+    const cols = [["clean", "Clean"], ["pitch:2", "Pitch +2 st"], ["pitchrt:2", "+2 st and back"],
+                  ["tempo:1.2", "Tempo ×1.2"], ["temport:1.2", "×1.2 and back"]];
+    rtEl.innerHTML = `<thead><tr><th>Model</th>${cols.map(c => `<th>${c[1]}</th>`).join("")}</tr></thead><tbody>` +
+      RT.map(m => `<tr><td>${m.model}</td>${cols.map(([k]) => { const v = m.eer[k];
+        return `<td>${v ? `${fmt(v[0])} ± ${fmt(v[1])}` : "–"}</td>`; }).join("")}</tr>`).join("") + "</tbody>";
+  } else rtEl.closest(".table-wrap").previousElementSibling.insertAdjacentHTML("afterend", '<p class="note">Coming soon.</p>');
+
+  // ---------- augmentation table with model tabs
+  const AUG = ALL.aug || [];
+  const augTabs = document.getElementById("aug-tabs"), augEl = document.getElementById("aug-table");
+  function drawAug(mi) {
+    const m = AUG[mi], cell = v => v ? `${fmt(v[0])} ± ${fmt(v[1])}` : "–";
+    augEl.innerHTML = `<thead><tr><th>Edit</th><th>Clean only</th><th>+ edits in training</th><th>+ edits, this type unseen</th></tr></thead><tbody>` +
+      m.rows.map(r => `<tr class="${r.edit === "clean" ? "clean-row" : ""}"><td>${label(r.edit)}</td><td>${cell(r.none)}</td><td>${cell(r.all)}</td><td>${cell(r.lofo)}</td></tr>`).join("") + "</tbody>";
+    augTabs.querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", i === mi));
+  }
+  if (AUG.length) {
+    augTabs.innerHTML = AUG.map(m => `<button type="button">${m.model}</button>`).join("");
+    augTabs.querySelectorAll("button").forEach((b, i) => b.onclick = () => drawAug(i));
+    drawAug(AUG.findIndex(m => m.model === "WavLM-Large") >= 0 ? AUG.findIndex(m => m.model === "WavLM-Large") : 0);
+  } else { augTabs.style.display = "none"; augEl.outerHTML = '<p class="note">Coming soon.</p>'; }
+
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => location.reload());
 
-  // ---------- optional audio demo (docs/data/demo.js sets window.DEMO = [{label, file, score}])
+  // ---------- audio demo (docs/data/demo.js, written by make_demo.py)
   const D = window.DEMO;
-  if (D && D.length) {
-    document.getElementById("demo-box").innerHTML = D.map(d => `
-      <div class="demo-row"><div>${d.label}</div><audio controls preload="none" src="${d.file}"></audio>
-      <div class="score">AI score ${d.score.toFixed(2)}<div class="meter"><i style="width:${(d.score * 100).toFixed(0)}%"></i></div></div></div>`).join("");
+  if (D && D.clips) {
+    const meter = (p, thr) => `<div class="meter" title="threshold ${thr.toFixed(2)}"><i style="width:${(p * 100).toFixed(0)}%"></i></div>`;
+    const verdict = (p, thr, truth) => {
+      const ai = p > thr, wrong = ai !== (truth === "ai");
+      return `<span class="verdict ${wrong ? "wrong" : ""}">${ai ? "AI" : "Real"}</span> ${p.toFixed(2)}${meter(p, thr)}`;
+    };
+    document.getElementById("demo-box").innerHTML = D.clips.map(c => `
+      <h3 style="margin-top:4px">${c.kind === "real" ? "Real singer" : "AI-sung clip"}</h3>
+      <div class="demo-row demo-head"><div>Version</div><div>Audio</div><div>Trained on clean</div><div>Trained with edits</div></div>
+      ${c.rows.map(r => `<div class="demo-row"><div>${r.label}</div>
+        <audio controls preload="none" src="${r.file}"></audio>
+        <div class="score">${verdict(r.score_none, D.thr_none, c.kind)}</div>
+        <div class="score">${verdict(r.score_aug, D.thr_aug, c.kind)}</div></div>`).join("")}`).join("") +
+      `<p class="small muted" style="margin-top:12px">Front end: ${D.model}, singer fold ${D.fold}. ✗ = wrong decision.
+       Thresholds: ${D.thr_none.toFixed(2)} (clean) and ${D.thr_aug.toFixed(2)} (with edits). Audio: CtrSVDD [3], M4Singer vocals, 4-second excerpts for research demonstration.</p>`;
   }
 })();
 </script>

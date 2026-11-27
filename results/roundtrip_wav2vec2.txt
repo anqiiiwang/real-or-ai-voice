@@ -1,0 +1,28 @@
+device=mps  model=facebook/wav2vec2-base
+pool: 2200 clips from 11 singers
+  fold 1: test singers ['CtrSVDD_0055', 'CtrSVDD_0113']
+  fold 2: test singers ['CtrSVDD_0110', 'CtrSVDD_0111']
+  fold 3: test singers ['CtrSVDD_0057', 'CtrSVDD_0112']
+  fold 4: test singers ['CtrSVDD_0054', 'CtrSVDD_0056']
+  fold 5: test singers ['CtrSVDD_0052', 'CtrSVDD_0053']
+extracting 2200 clips x 5 conditions (cached after the first run)
+
+  features       clean: (2200, 13, 768)  (0s)
+  features     pitch:2: (2200, 13, 768)  (0s)
+  features   pitchrt:2: (2200, 13, 768)  (76s)
+  features   tempo:1.2: (2200, 13, 768)  (76s)
+  features temport:1.2: (2200, 13, 768)  (147s)
+fold 1: layer  2  clean EER 0.158
+fold 2: layer  2  clean EER 0.100
+fold 3: layer  2  clean EER 0.120
+fold 4: layer  2  clean EER 0.100
+fold 5: layer  1  clean EER 0.165
+
+        edit   EER (mean ± std)           acc       real ok       fake ok
+       clean     0.129 ± 0.028  0.848 ± 0.042  0.852 ± 0.114  0.844 ± 0.099
+     pitch:2     0.294 ± 0.051  0.629 ± 0.052  0.414 ± 0.203  0.845 ± 0.135
+   pitchrt:2     0.316 ± 0.048  0.673 ± 0.042  0.679 ± 0.189  0.667 ± 0.151
+   tempo:1.2     0.279 ± 0.040  0.661 ± 0.055  0.475 ± 0.200  0.846 ± 0.128
+ temport:1.2     0.317 ± 0.023  0.634 ± 0.056  0.497 ± 0.280  0.771 ± 0.180
+
+saved results/wav2vec2-base_rotate_roundtrip_summary.csv and per-fold results   total time 151s
