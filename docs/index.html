@@ -139,16 +139,24 @@
 
 <section id="motivation">
   <h2>Motivation</h2>
-  <p>Around 10% of the tracks delivered to the streaming platform Deezer are AI-generated [1].
-  Frohmann et al. [1] detect them from <em>lyrics transcripts</em>, which is robust to audio edits but only
-  catches AI-written lyrics. It has a blind spot: <strong>human-written songs sung by an AI voice</strong>,
-  such as AI covers.</p>
-  <p>Singing-voice deepfake detection (SVDD) targets exactly this case. Chinese datasets and strong
-  detectors exist [2, 3, 4], but they are mostly evaluated on <strong>clean audio</strong>. Hurt &amp; Yang [6]
-  recently tested frozen speech encoders on CtrSVDD under noise, reverberation and lossy coding. They leave
-  music-pretrained encoders and training-time augmentation open. Pitch shift and tempo change, the most
-  common edits in music, have so far been studied only for full-song music detectors [7].
-  Real AI covers are often pitch-shifted, sped up, or mixed with reverb. Does detection survive those edits?</p>
+    <p>With the rapid progress of generative models, AI-generated music has become
+    increasingly common on streaming platforms. Frohmann et al. [1] note that on Deezer,
+    for example, around 10% of newly delivered tracks are now AI-generated. To detect such
+    content, they classify <em>lyrics transcripts</em>, an approach that remains reliable
+    under audio manipulations. However, because it relies on the lyrics, it cannot flag
+    songs whose lyrics were written by a human but whose vocals were synthesised, as is
+    the case for most AI covers. In other words, it misses
+    <strong>human-written songs sung by an AI voice</strong>.</p>
+    <p>This setting is the focus of singing voice deepfake detection (SVDD). Several
+    datasets, including Chinese ones, and well-performing detectors have been proposed
+    [2, 3, 4], but they are mostly evaluated on <strong>clean audio</strong>. Hurt &amp; Yang [6]
+    recently examined how frozen speech encoders on CtrSVDD cope with noise, reverberation
+    and lossy compression, leaving music-pretrained encoders and augmentation during
+    training unexplored. Pitch shifting and time stretching, which are among the most
+    common edits in music production, have only been studied for detectors that operate
+    on full songs [7]. Since AI covers circulating online are frequently pitch-shifted,
+    sped up or mixed with reverb, we investigate whether SVDD models remain reliable
+    under these manipulations.</p>
   <div class="card">
     <h3 style="margin-top:0">Research questions</h3>
     <ul class="clean">
