@@ -111,7 +111,8 @@
   @media (max-width: 640px) { .demo-row { grid-template-columns: 1fr 1fr; } .demo-row audio { grid-column: 1 / -1; } }
   .demo-row audio { width: 100%; height: 34px; }
   .score { font-variant-numeric: tabular-nums; }
-  .meter { height: 6px; border-radius: 3px; background: var(--grid); margin-top: 4px; overflow: hidden; }
+  .meter { height: 6px; border-radius: 3px; background: var(--grid); margin-top: 4px; position: relative; }
+  .meter .thr { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink); border-radius: 1px; }
   .meter i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
 
   .refs li { margin-bottom: 8px; font-size: 15px; }
@@ -124,14 +125,14 @@
 <header class="hero">
   <p class="eyebrow">Audio Processing and Indexing · Leiden University · 2026</p>
   <h1>Real Voice or AI Voice? Robust Detection of AI-Sung Chinese Songs</h1>
-  <p class="byline"><strong>Anqi Wang</strong> · MSc Computer Science, Leiden University</p>
+  <p class="byline"><strong>Anqi Wang</strong> · MSc Computer Science (AI), Leiden University</p>
   <div class="links">
     <a href="https://github.com/anqiiiwang/real-or-ai-voice">Code on GitHub</a>
     <a href="#results">Results</a>
     <a href="#demo">Listen</a>
   </div>
   <div class="tldr">
-    <b>Abstract</b>
+    <b>Summary</b>
     Singing-voice deepfake detectors are evaluated on clean audio. We test three of them on Mandarin singing
     after everyday edits (pitch shift, tempo change, noise, reverb). Every edit hurts, and the detector that is
     best on clean audio (WavLM) collapses: after a one-semitone pitch shift it calls almost every real singer
@@ -480,7 +481,7 @@ python make_site_data.py                             # update this page</code></
   // ---------- audio demo (docs/data/demo.js, written by make_demo.py)
   const D = window.DEMO;
   if (D && D.clips) {
-    const meter = (p, thr) => `<div class="meter" title="threshold ${thr.toFixed(2)}"><i style="width:${(p * 100).toFixed(0)}%"></i></div>`;
+    const meter = (p, thr) => `<div class="meter" title="threshold ${thr.toFixed(2)}"><i style="width:${(p * 100).toFixed(0)}%"></i><span class="thr" style="left:calc(${(thr * 100).toFixed(1)}% - 1px)"></span></div>`;
     const verdict = (p, thr, truth) => {
       const ai = p > thr, wrong = ai !== (truth === "ai");
       return `<span class="verdict ${wrong ? "wrong" : ""}">${ai ? "AI" : "Real"}</span> ${p.toFixed(2)}${meter(p, thr)}`;
@@ -492,7 +493,7 @@ python make_site_data.py                             # update this page</code></
         <audio controls preload="none" src="${r.file}"></audio>
         <div class="score">${verdict(r.score_none, D.thr_none, c.kind)}</div>
         <div class="score">${verdict(r.score_aug, D.thr_aug, c.kind)}</div></div>`).join("")}`).join("") +
-      `<p class="small muted" style="margin-top:12px">Front end: ${D.model}, singer fold ${D.fold}. ✗ = wrong decision.
+      `<p class="small muted" style="margin-top:12px">Front end: ${D.model}, singer fold ${D.fold}. The black tick on each bar is the decision threshold; scores to its right mean "AI". ✗ = wrong decision.
        Thresholds: ${D.thr_none.toFixed(2)} (clean) and ${D.thr_aug.toFixed(2)} (with edits). Audio: CtrSVDD [3], M4Singer vocals, 4-second excerpts for research demonstration.</p>`;
   }
 })();
