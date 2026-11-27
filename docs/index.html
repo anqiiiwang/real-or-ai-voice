@@ -121,11 +121,11 @@
   </div>
   <div class="tldr">
     <b>Summary</b>
-    Singing-voice deepfake detectors are usually evaluated on clean audio, but do they still work after common edits like pitch shifting or adding reverb?
-    In this project, we tested how well singing-voice deepfake detectors handle edited audio. Using Mandarin vocals from CtrSVDD, I applied pitch shifts, 
-    tempo changes, noise and reverb, and compared detectors based on wav2vec2, WavLM and MERT. Every edit reduced performance. WavLM was the most accurate 
-    on clean audio, but after a one-semitone pitch shift it labelled nearly all real singers as AI. The same happened when the pitch was shifted up and back down, 
-    so the detectors seem to react to the processing itself. Training with some edited clips helped a lot; a more complex classifier did not.
+    Singing-voice deepfake detectors are usually benchmarked on clean audio. Yet it remains unclear whether they hold up under everyday edits like pitch shifting or adding reverb.
+    we tested wav2vec2-, WavLM-, and MERT-based detectors on Mandarin singing from CtrSVDD after applying pitch shifts, tempo changes, noise, and reverb.
+    As it turns out, none of the detectors held up well, as every edit degraded accuracy. For example, WavLM performed best on clean audio, a single-semitone pitch shift caused it 
+    to flag nearly all real singers as AI. Even shifting the pitch up and right back down triggered the same failure, suggesting the models are latching onto processing artifacts 
+    rather than actual deepfake cues. Including edited clips in training largely fixed this, whereas using a more complex classifier barely helped.
   </div>
 </header>
 
